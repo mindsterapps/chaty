@@ -151,8 +151,10 @@ class _ChatScreenState extends State<ChatScreen> {
               },
             ),
           ),
-          Padding(
+          Container(
+            margin: const EdgeInsets.all(5.0),
             padding: const EdgeInsets.all(8.0),
+            color: Colors.blueGrey[50],
             child: Row(
               children: [
                 IconButton(
