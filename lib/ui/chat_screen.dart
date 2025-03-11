@@ -36,6 +36,9 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    print(
+        'widget.chatid: ${widget.chatId}\nwidget.senderId: ${widget.senderId}\nwidget.receiverId ${widget.receiverId}');
+
     _chatService.markMessagesAsRead(widget.chatId, widget.senderId);
     _chatService.getTypingStatus(widget.chatId).listen((status) {
       if (status != null) {
