@@ -1,54 +1,146 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:chaty/services/chat_services.dart';
-import 'package:chaty/services/storage_services.dart';
+import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../models/message.dart';
+import '../services/chat_service.dart';
 import 'message_bubble.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_sound/flutter_sound.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChatScreen extends StatefulWidget {
   final String chatId;
   final String senderId;
   final String receiverId;
+  final Widget Function(bool isMe, Message message)? chatBubble;
+  final Widget Function(Function? onSend)? sendMessagebottom;
 
   const ChatScreen({
     super.key,
     required this.chatId,
     required this.senderId,
     required this.receiverId,
+    this.chatBubble,
+    this.sendMessagebottom,
   });
 
   @override
-  _ChatScreenState createState() => _ChatScreenState();
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final TextEditingController _messageController = TextEditingController();
   final ChatService _chatService = ChatService();
-  final StorageService _storageService = StorageService();
-  final ImagePicker _picker = ImagePicker();
-  File? _selectedImage;
-  bool _isTyping = false;
-  Timer? _typingTimer;
-  bool _receiverTyping = false;
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  List<Message> _messages = [];
+  bool _isLoadingMore = false;
+  Message? _lastMessage;
+  bool _hasMoreMessages = true;
+
+  FlutterSoundRecorder? _audioRecorder;
+  bool _isRecording = false;
+  String? _audioPath;
 
   @override
   void initState() {
     super.initState();
-    print(
-        'widget.chatid: ${widget.chatId}\nwidget.senderId: ${widget.senderId}\nwidget.receiverId ${widget.receiverId}');
+    _fetchInitialMessages();
+    _markMessagesAsRead();
+    _initRecorder();
+  }
 
-    _chatService.markMessagesAsRead(widget.chatId, widget.senderId);
-    _chatService.getTypingStatus(widget.chatId).listen((status) {
-      if (status != null) {
-        setState(() {
-          _receiverTyping = status[widget.receiverId] ?? false;
-        });
-      }
+  Future<void> _initRecorder() async {
+    _audioRecorder = FlutterSoundRecorder();
+
+    var status = await Permission.microphone.request();
+    if (status != PermissionStatus.granted) {
+      ("❌ Microphone permission not granted").log('#AudioRecorder');
+      return;
+    }
+
+    await _audioRecorder!.openRecorder();
+  }
+
+  /// Start recording audio
+  Future<void> _startRecording() async {
+    final dir = await getApplicationDocumentsDirectory();
+    _audioPath =
+        '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
+    await _audioRecorder!.startRecorder(toFile: _audioPath);
+    setState(() => _isRecording = true);
+  }
+
+  /// Stop recording audio
+  Future<void> _stopRecording() async {
+    await _audioRecorder!.stopRecorder();
+    setState(() => _isRecording = false);
+    _sendAudioMessage();
+  }
+
+  /// Send an audio message
+  void _sendAudioMessage() {
+    if (_audioPath == null) return;
+
+    Message message = Message(
+      messageId: DateTime.now().millisecondsSinceEpoch.toString(),
+      senderId: widget.senderId,
+      receiverId: widget.receiverId,
+      text: '',
+      mediaUrl: _audioPath,
+      timestamp: DateTime.now(),
+      status: MessageStatus.unread,
+    );
+
+    _chatService.sendMessage(message);
+  }
+
+  /// Fetch the first batch of messages with real-time updates
+  Future<void> _fetchInitialMessages() async {
+    _chatService.streamLatestMessages(widget.chatId).listen((newMessages) {
+      setState(() {
+        if (_messages.isEmpty) {
+          _messages = newMessages;
+        } else {
+          for (var msg in newMessages) {
+            if (!_messages.any((m) => m.messageId == msg.messageId)) {
+              _messages.insert(0, msg);
+            }
+          }
+        }
+        if (_messages.isNotEmpty) {
+          _lastMessage = _messages.last; // Save last message for pagination
+        }
+      });
+      _markMessagesAsRead();
     });
   }
 
+  /// Mark all messages as read
+  void _markMessagesAsRead() {
+    _chatService.markMessagesAsRead(widget.chatId, widget.senderId);
+  }
+
+  /// Load older messages when pulling down
+  Future<void> _loadMoreMessages() async {
+    if (_isLoadingMore || !_hasMoreMessages || _lastMessage == null) return;
+    setState(() => _isLoadingMore = true);
+
+    List<Message> olderMessages = await _chatService.fetchMessages(
+        _chatService.getChatId(widget.senderId, widget.receiverId),
+        lastMessage: _lastMessage);
+    if (olderMessages.isNotEmpty) {
+      setState(() {
+        _messages.addAll(olderMessages);
+        _lastMessage = olderMessages.last; // Update last message for pagination
+      });
+    } else {
+      setState(() => _hasMoreMessages = false); // No more messages to load
+    }
+
+    setState(() => _isLoadingMore = false);
+  }
+
+  /// Send a message
   void _sendMessage() {
     if (_messageController.text.trim().isEmpty) return;
 
@@ -64,121 +156,82 @@ class _ChatScreenState extends State<ChatScreen> {
 
     _chatService.sendMessage(message);
     _messageController.clear();
-    _chatService.updateTypingStatus(widget.chatId, widget.senderId, false);
-  }
-
-  Future<void> _sendImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
-
-    setState(() => _selectedImage = File(pickedFile.path));
-
-    String? mediaUrl = await _storageService.uploadMedia(
-        File(pickedFile.path), 'chat_media/${widget.senderId}');
-    if (mediaUrl != null) {
-      Message message = Message(
-        messageId: DateTime.now().millisecondsSinceEpoch.toString(),
-        senderId: widget.senderId,
-        receiverId: widget.receiverId,
-        text: "",
-        mediaUrl: mediaUrl,
-        timestamp: DateTime.now(),
-        status: MessageStatus.unread,
-      );
-
-      _chatService.sendMessage(message);
-    }
-  }
-
-  void _onTyping() {
-    if (!_isTyping) {
-      _isTyping = true;
-      _chatService.updateTypingStatus(widget.chatId, widget.senderId, true);
-    }
-    _typingTimer?.cancel();
-    _typingTimer = Timer(const Duration(seconds: 2), () {
-      _isTyping = false;
-      _chatService.updateTypingStatus(widget.chatId, widget.senderId, false);
-    });
-  }
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    _typingTimer?.cancel();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Chat")),
+      floatingActionButton: FloatingActionButton(onPressed: _loadMoreMessages),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       body: Column(
         children: [
-          Visibility(
-            visible: _receiverTyping,
-            child: const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Typing...",
-                style: TextStyle(
-                    fontSize: 14,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.grey),
-              ),
-            ),
-          ),
           Expanded(
-            child: StreamBuilder<List<Message>>(
-              stream: _chatService.getMessages(widget.chatId),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                List<Message> messages = snapshot.data!;
-
-                return ListView.builder(
-                  reverse: true,
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    return MessageBubble(
-                      message: messages[index],
-                      isMe: messages[index].senderId == widget.senderId,
+            child: ListView.builder(
+              controller: _scrollController,
+              reverse: true,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final bubble = widget.chatBubble?.call(
+                    _messages[index].senderId == widget.senderId,
+                    _messages[index]);
+                return bubble ??
+                    MessageBubble(
+                      message: _messages[index],
+                      isMe: _messages[index].senderId == widget.senderId,
                     );
-                  },
-                );
               },
             ),
           ),
-          Container(
-            margin: const EdgeInsets.all(5.0),
+
+          if (_isLoadingMore)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            ),
+
+          // Message Input Field
+          Padding(
             padding: const EdgeInsets.all(8.0),
-            color: Colors.blueGrey[50],
             child: Row(
               children: [
                 IconButton(
-                  icon: const Icon(Icons.image),
-                  onPressed: _sendImage,
+                  icon: Icon(_isRecording ? Icons.stop : Icons.mic,
+                      color: Colors.red),
+                  onPressed: _isRecording ? _stopRecording : _startRecording,
                 ),
-                Expanded(
-                  child: TextField(
-                    controller: _messageController,
-                    onChanged: (_) => _onTyping(),
-                    decoration: const InputDecoration(
-                      hintText: "Type a message...",
-                      border: InputBorder.none,
+                MessageTextField(messageController: _messageController),
+                widget.sendMessagebottom?.call(_sendMessage) ??
+                    IconButton(
+                      icon: const Icon(Icons.send),
+                      onPressed: _sendMessage,
                     ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send),
-                  onPressed: _sendMessage,
-                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class MessageTextField extends StatelessWidget {
+  const MessageTextField({
+    super.key,
+    required TextEditingController messageController,
+  }) : _messageController = messageController;
+
+  final TextEditingController _messageController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: TextField(
+        controller: _messageController,
+        decoration: const InputDecoration(
+          hintText: "Type a message...",
+          border: OutlineInputBorder(),
+        ),
       ),
     );
   }

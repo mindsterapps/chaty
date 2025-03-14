@@ -6,7 +6,7 @@ export 'models/message.dart';
 export 'models/users.dart';
 
 // Export Services
-export 'package:chaty/services/chat_services.dart';
+export 'package:chaty/services/chat_service.dart';
 export 'package:chaty/services/storage_services.dart';
 export 'package:chaty/services/notification_services.dart';
 

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:chaty/services/storage_services.dart';
+import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/message.dart';
 
@@ -16,16 +19,67 @@ class ChatService {
     await messageRef.set(message.toMap());
   }
 
+  late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
+
   /// Fetch messages in real-time
   Stream<List<Message>> getMessages(String chatId) {
-    return _firestore
+    print(chatId);
+    final snap = _firestore
         .collection('chats')
         .doc(chatId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
+        .snapshots();
+
+    return snap.map((snapshot) {
+      lastDocument = snapshot.docs.last;
+      return snapshot.docs.map((doc) => Message.fromMap(doc.data())).toList();
+    });
+  }
+
+  Future<List<Message>> fetchMessages(String chatId,
+      {Message? lastMessage, int limit = 5}) async {
+    Query query = _firestore
+        .collection('chats')
+        .doc(chatId)
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(limit);
+
+    if (lastMessage != null) {
+      query = query.startAfter([lastMessage.toMap()['timestamp']]);
+    }
+
+    QuerySnapshot querySnapshot = await query.get();
+
+    print("🔥 Fetching messages for chatId: $chatId");
+    print("🔥 Last Timestamp: ${lastMessage?.timestamp}");
+    print("🔥 Query Retrieved Messages: ${querySnapshot.docs.length}");
+
+    // Print all retrieved message timestamps
+    for (var doc in querySnapshot.docs) {
+      print(
+          "🔥 Message Timestamp: ${(doc.data() as Map<String, dynamic>)['timestamp']}");
+    }
+
+    List<Message> messages = querySnapshot.docs
+        .map((doc) => Message.fromMap(doc.data() as Map<String, dynamic>))
+        .toList();
+
+    return messages;
+  }
+
+  Stream<List<Message>> streamLatestMessages(String chatId) {
+    return _firestore
+        .collection('chats')
+        .doc(chatId.log('chatId'))
+        .collection('messages')
+        .orderBy('timestamp', descending: true)
+        .limit(5) // Stream the latest 20 messages
         .snapshots()
-        .map((snapshot) =>
-            snapshot.docs.map((doc) => Message.fromMap(doc.data())).toList());
+        .map((snapshot) => snapshot.docs
+            .map((doc) => Message.fromMap(doc.data().log('doc')))
+            .toList());
   }
 
   /// Update message status (delivered, unread, read)
@@ -111,4 +165,6 @@ class ChatService {
       },
     );
   }
+
+  String uploadAudio(File audioFile) => '';
 }

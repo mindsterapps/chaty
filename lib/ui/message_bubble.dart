@@ -4,7 +4,6 @@ import '../models/message.dart';
 class MessageBubble extends StatelessWidget {
   final Message message;
   final bool isMe;
-
   const MessageBubble({super.key, required this.message, required this.isMe});
 
   @override
