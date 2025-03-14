@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
-import 'message_bubble.dart';
 
 class MessageList extends StatelessWidget {
   final List<Message> messages;
@@ -20,27 +19,18 @@ class MessageList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Expanded(
-          child: ListView.builder(
-            controller: scrollController,
-            reverse: true,
-            itemCount: messages.length,
-            itemBuilder: (context, index) {
-              return messageBubble(
-                message: messages[index],
-                isMe: messages[index].senderId == senderId,
-              );
-            },
-          ),
-        ),
-        if (isLoadingMore)
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: CircularProgressIndicator(),
-          ),
-      ],
+    return Expanded(
+      child: ListView.builder(
+        controller: scrollController,
+        reverse: true,
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          return messageBubble(
+            message: messages[index],
+            isMe: messages[index].senderId == senderId,
+          );
+        },
+      ),
     );
   }
 }
