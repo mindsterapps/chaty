@@ -45,6 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _fetchInitialMessages();
     _markMessagesAsRead();
+    _scrollController.addListener(_onScroll);
   }
 
   Future<void> _fetchInitialMessages() async {
@@ -121,12 +122,19 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatService.sendMessage(message);
   }
 
+  void _onScroll() {
+    // Detect when user scrolls past 50% of the list height
+    if (_scrollController.position.pixels <
+            _scrollController.position.maxScrollExtent / 2 &&
+        !_isLoadingMore &&
+        _hasMoreMessages) {
+      _loadMoreMessages();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Chat")),
-      floatingActionButton: FloatingActionButton(onPressed: _loadMoreMessages),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
       body: Column(
         children: [
           MessageList(
