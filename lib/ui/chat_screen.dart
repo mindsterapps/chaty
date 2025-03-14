@@ -150,11 +150,6 @@ class _ChatScreenState extends State<ChatScreen> {
             scrollController: _scrollController,
             isLoadingMore: _isLoadingMore,
           ),
-          if (_isLoadingMore)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
           widget.sendMessageBuilder?.call(
                 context,
                 sendMessage: _sendMessage,
