@@ -128,7 +128,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _onScroll() {
     // Detect when user scrolls past 50% of the list height
     if (_scrollController.position.pixels <
-            _scrollController.position.maxScrollExtent / 9 &&
+            _scrollController.position.maxScrollExtent / 05 &&
         !_isLoadingMore &&
         _hasMoreMessages) {
       _loadMoreMessages();
