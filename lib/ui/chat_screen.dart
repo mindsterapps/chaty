@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:chaty/ui/message_bubble.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
@@ -6,15 +7,23 @@ import 'message_list.dart';
 import 'message_input.dart';
 
 class ChatScreen extends StatefulWidget {
-  final String chatId;
   final String senderId;
   final String receiverId;
-
+  final Widget Function(
+    BuildContext context, {
+    required void Function(String txt) sendMessage,
+    required void Function(String audioPath) sendAudioMessage,
+  })? sendMessageBuilder;
+  final Widget Function({required Message message, required bool isMe})?
+      messageBubbleBuilder;
+  final Future<String> Function(String mediaPath)? mediaUploaderFunction;
   const ChatScreen({
     super.key,
-    required this.chatId,
     required this.senderId,
     required this.receiverId,
+    this.sendMessageBuilder,
+    this.messageBubbleBuilder,
+    this.mediaUploaderFunction,
   });
 
   @override
@@ -28,16 +37,18 @@ class _ChatScreenState extends State<ChatScreen> {
   bool _isLoadingMore = false;
   Message? _lastMessage;
   bool _hasMoreMessages = true;
+  late final String chatId;
 
   @override
   void initState() {
+    chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
     super.initState();
     _fetchInitialMessages();
     _markMessagesAsRead();
   }
 
   Future<void> _fetchInitialMessages() async {
-    _chatService.streamLatestMessages(widget.chatId).listen((newMessages) {
+    _chatService.streamLatestMessages(chatId).listen((newMessages) {
       setState(() {
         if (_messages.isEmpty) {
           _messages = newMessages;
@@ -57,7 +68,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _markMessagesAsRead() {
-    _chatService.markMessagesAsRead(widget.chatId, widget.senderId);
+    _chatService.markMessagesAsRead(chatId, widget.senderId);
   }
 
   Future<void> _loadMoreMessages() async {
@@ -93,15 +104,16 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatService.sendMessage(message);
   }
 
-  void _sendAudioMessage(String? audioPath) {
+  void _sendAudioMessage(String? audioPath) async {
     if (audioPath == null) return;
-
+    final path = await widget.mediaUploaderFunction?.call(audioPath);
+    if (path == null) return;
     Message message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
       receiverId: widget.receiverId,
       text: '',
-      mediaUrl: audioPath,
+      mediaUrl: path,
       timestamp: DateTime.now(),
       status: MessageStatus.unread,
     );
@@ -118,15 +130,24 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           MessageList(
+            messageBubble: ({required isMe, required message}) => MessageBubble(
+              isMe: isMe,
+              message: message,
+            ),
             messages: _messages,
             senderId: widget.senderId,
             scrollController: _scrollController,
             isLoadingMore: _isLoadingMore,
           ),
-          MessageInput(
-            onSendMessage: _sendMessage,
-            onSendAudioMessage: _sendAudioMessage,
-          ),
+          widget.sendMessageBuilder?.call(
+                context,
+                sendMessage: _sendMessage,
+                sendAudioMessage: _sendAudioMessage,
+              ) ??
+              MessageInput(
+                onSendMessage: _sendMessage,
+                onSendAudioMessage: _sendAudioMessage,
+              ),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -14,7 +15,7 @@ class MessageInput extends StatefulWidget {
   });
 
   @override
-  _MessageInputState createState() => _MessageInputState();
+  State<MessageInput> createState() => _MessageInputState();
 }
 
 class _MessageInputState extends State<MessageInput> {
@@ -34,7 +35,7 @@ class _MessageInputState extends State<MessageInput> {
 
     var status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) {
-      print("❌ Microphone permission not granted");
+      "❌ Microphone permission not granted".log();
       return;
     }
 
@@ -67,11 +68,6 @@ class _MessageInputState extends State<MessageInput> {
       padding: const EdgeInsets.all(8.0),
       child: Row(
         children: [
-          IconButton(
-            icon:
-                Icon(_isRecording ? Icons.stop : Icons.mic, color: Colors.red),
-            onPressed: _isRecording ? _stopRecording : _startRecording,
-          ),
           Expanded(
             child: TextField(
               controller: _messageController,
@@ -84,6 +80,11 @@ class _MessageInputState extends State<MessageInput> {
           IconButton(
             icon: const Icon(Icons.send),
             onPressed: _sendMessage,
+          ),
+          IconButton(
+            icon:
+                Icon(_isRecording ? Icons.stop : Icons.mic, color: Colors.red),
+            onPressed: _isRecording ? _stopRecording : _startRecording,
           ),
         ],
       ),

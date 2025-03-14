@@ -7,13 +7,15 @@ class MessageList extends StatelessWidget {
   final String senderId;
   final ScrollController scrollController;
   final bool isLoadingMore;
-
+  final Widget Function({required Message message, required bool isMe})
+      messageBubble;
   const MessageList({
     super.key,
     required this.messages,
     required this.senderId,
     required this.scrollController,
     required this.isLoadingMore,
+    required this.messageBubble,
   });
 
   @override
@@ -26,7 +28,7 @@ class MessageList extends StatelessWidget {
             reverse: true,
             itemCount: messages.length,
             itemBuilder: (context, index) {
-              return MessageBubble(
+              return messageBubble(
                 message: messages[index],
                 isMe: messages[index].senderId == senderId,
               );

@@ -1,0 +1,200 @@
+import 'package:chaty/models/message.dart';
+import 'package:chaty/services/notification_services.dart';
+import 'package:chaty/ui/chat_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Initialize Firebase
+  await NotificationService().initialize();
+
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Chaty Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const HomeScreen(), // Initial screen
+    );
+  }
+}
+
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _user1Controller = TextEditingController();
+  final TextEditingController _user2Controller = TextEditingController();
+  final TextEditingController _messageController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Chaty Example")),
+      body: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            TextField(
+              controller: _user1Controller,
+              decoration: const InputDecoration(
+                hintText: "Enter your name",
+              ),
+            ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _user2Controller,
+              decoration: const InputDecoration(
+                hintText: "Enter another user's name",
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to ChatScreen with sample data
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ChatScreen(
+                      senderId: _user1Controller.text,
+                      receiverId: _user2Controller.text,
+                      mediaUploaderFunction: (mediaPath) async {
+                        // Upload media to cloud storage
+                        return Future.microtask(() => 'media_url.aac');
+                      },
+                      messageBubbleBuilder: (
+                          {required isMe, required message}) {
+                        return _MessageBubble(
+                          isMe: isMe,
+                          message: message,
+                        );
+                      },
+                      sendMessageBuilder: (
+                        context, {
+                        required sendAudioMessage,
+                        required sendMessage,
+                      }) {
+                        return _SendMessageWidget(
+                          messageController: _messageController,
+                          sendMessage: sendMessage,
+                          sendAudioMessage: sendAudioMessage,
+                        );
+                      },
+                    ),
+                  ),
+                );
+              },
+              child: const Text("Start Chat"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MessageBubble extends StatelessWidget {
+  const _MessageBubble({
+    required this.isMe,
+    required this.message,
+  });
+  final bool isMe;
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 5),
+        decoration: BoxDecoration(
+          color: isMe ? Colors.blue : Colors.grey[300],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (message.mediaUrl != null)
+              Image.network(
+                message.mediaUrl!,
+                width: 200,
+                height: 200,
+                fit: BoxFit.cover,
+              ),
+            if (message.text.isNotEmpty)
+              Text(
+                message.text,
+                style: const TextStyle(fontSize: 16),
+              ),
+            const SizedBox(height: 5),
+            Text(
+              message.timestamp.toIso8601String(),
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SendMessageWidget extends StatelessWidget {
+  const _SendMessageWidget({
+    required TextEditingController messageController,
+    required this.sendMessage,
+    required this.sendAudioMessage,
+  }) : _messageController = messageController;
+  final void Function(String) sendMessage;
+  final void Function(String) sendAudioMessage;
+  final TextEditingController _messageController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.mic, color: Colors.red),
+            onPressed: () {
+              // Send audio message
+              sendMessage('audio_path');
+            },
+          ),
+          Expanded(
+            child: TextField(
+              controller: _messageController,
+              onSubmitted: (text) {
+                // Send text message
+                sendMessage(text);
+              },
+              decoration: const InputDecoration(
+                hintText: "Type a message...",
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.send),
+            onPressed: () {
+              // Send text message
+              sendMessage(_messageController.text);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
