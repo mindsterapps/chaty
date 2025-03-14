@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
-class Messag  eList extends StatelessWidget {
+class MessageList extends StatelessWidget {
   final List<Message> messages;
   final String senderId;
   final ScrollController scrollController;
