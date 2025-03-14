@@ -9,6 +9,7 @@ import 'message_input.dart';
 class ChatScreen extends StatefulWidget {
   final String senderId;
   final String receiverId;
+  final int? intialChatLimit;
   final Widget Function(
     BuildContext context, {
     required void Function(String txt) sendMessage,
@@ -24,6 +25,7 @@ class ChatScreen extends StatefulWidget {
     this.sendMessageBuilder,
     this.messageBubbleBuilder,
     this.mediaUploaderFunction,
+    this.intialChatLimit,
   });
 
   @override
@@ -41,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
+    _chatService.initialLimit = widget.intialChatLimit ?? 5;
     chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
     super.initState();
     _fetchInitialMessages();

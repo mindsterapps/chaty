@@ -37,14 +37,15 @@ class ChatService {
     });
   }
 
+  int initialLimit = 5;
   Future<List<Message>> fetchMessages(String chatId,
-      {Message? lastMessage, int limit = 5}) async {
+      {Message? lastMessage}) async {
     Query query = _firestore
         .collection('chats')
         .doc(chatId)
         .collection('messages')
         .orderBy('timestamp', descending: true)
-        .limit(limit);
+        .limit(initialLimit);
 
     if (lastMessage != null) {
       query = query.startAfter([lastMessage.toMap()['timestamp']]);
@@ -75,7 +76,7 @@ class ChatService {
         .doc(chatId.log('chatId'))
         .collection('messages')
         .orderBy('timestamp', descending: true)
-        .limit(5) // Stream the latest 20 messages
+        .limit(initialLimit) // Stream the latest 20 messages
         .snapshots()
         .map((snapshot) => snapshot.docs
             .map((doc) => Message.fromMap(doc.data().log('doc')))
