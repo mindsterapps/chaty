@@ -19,14 +19,14 @@ class ChatScreen extends StatefulWidget {
       messageBubbleBuilder;
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
   const ChatScreen({
-    super.key,
     required this.senderId,
     required this.receiverId,
     this.sendMessageBuilder,
     this.messageBubbleBuilder,
     this.mediaUploaderFunction,
     this.intialChatLimit,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();

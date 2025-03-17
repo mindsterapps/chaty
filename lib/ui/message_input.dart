@@ -9,10 +9,10 @@ class MessageInput extends StatefulWidget {
   final Function(String? audioPath) onSendAudioMessage;
 
   const MessageInput({
-    super.key,
+    Key? key,
     required this.onSendMessage,
     required this.onSendAudioMessage,
-  });
+  }) : super(key: key);
 
   @override
   State<MessageInput> createState() => _MessageInputState();

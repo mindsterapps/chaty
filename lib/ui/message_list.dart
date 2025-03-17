@@ -9,13 +9,13 @@ class MessageList extends StatelessWidget {
   final Widget Function({required Message message, required bool isMe})
       messageBubble;
   const MessageList({
-    super.key,
+    Key? key,
     required this.messages,
     required this.senderId,
     required this.scrollController,
     required this.isLoadingMore,
     required this.messageBubble,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
