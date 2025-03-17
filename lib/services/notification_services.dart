@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../models/message.dart' as model; 
+import '../models/message.dart' as model;
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
@@ -53,7 +53,8 @@ class NotificationService {
   }
 
   /// Send push notification to a user
-  Future<void> sendNotification(String receiverId, model.Message message) async {
+  Future<void> sendNotification(
+      String receiverId, model.Message message) async {
     // Get recipient's FCM token
     DocumentSnapshot userDoc =
         await _firestore.collection('users').doc(receiverId).get();
