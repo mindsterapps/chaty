@@ -176,29 +176,32 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: MessageList(
-              messageBubble: ({required isMe, required message}) => Dismissible(
-                key: Key(message.messageId),
-                background: Container(
-                  color: Colors.red,
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Icon(Icons.delete, color: Colors.white),
+              messageBubble: ({required isMe, required message}) => Align(
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                child: Dismissible(
+                  key: Key(message.messageId),
+                  background: Container(
+                    color: Colors.red,
+                    alignment:
+                        isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    padding: EdgeInsets.symmetric(horizontal: 20),
+                    child: Icon(Icons.delete, color: Colors.white),
+                  ),
+                  direction: isMe
+                      ? DismissDirection.endToStart
+                      : DismissDirection.startToEnd,
+                  onDismissed: (direction) {
+                    _confirmDeleteMessage(message.messageId);
+                  },
+                  child: widget.messageBubbleBuilder?.call(
+                        message: message,
+                        isMe: isMe,
+                      ) ??
+                      MessageBubble(
+                        isMe: isMe,
+                        message: message,
+                      ),
                 ),
-                direction: isMe
-                    ? DismissDirection.endToStart
-                    : DismissDirection.startToEnd,
-                onDismissed: (direction) {
-                  _confirmDeleteMessage(message.messageId);
-                },
-                child: widget.messageBubbleBuilder?.call(
-                      message: message,
-                      isMe: isMe,
-                    ) ??
-                    MessageBubble(
-                      isMe: isMe,
-                      message: message,
-                    ),
               ),
               messages: _messages,
               senderId: widget.senderId,
