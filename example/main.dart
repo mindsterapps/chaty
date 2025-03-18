@@ -83,13 +83,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                       sendMessageBuilder: (
                         context, {
-                        required sendAudioMessage,
+                        required sendMediaMessage,
                         required sendMessage,
                       }) {
                         return _SendMessageWidget(
                           messageController: _messageController,
                           sendMessage: sendMessage,
-                          sendAudioMessage: sendAudioMessage,
+                          sendAudioMessage: sendMediaMessage,
                         );
                       },
                     ),
@@ -171,7 +171,7 @@ class _SendMessageWidget extends StatelessWidget {
             icon: const Icon(Icons.mic, color: Colors.red),
             onPressed: () {
               // Send audio message
-              sendMessage('audio_path');
+              sendAudioMessage('audio_path');
             },
           ),
           Expanded(

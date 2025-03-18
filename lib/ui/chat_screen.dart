@@ -13,7 +13,7 @@ class ChatScreen extends StatefulWidget {
   final Widget Function(
     BuildContext context, {
     required void Function(String txt) sendMessage,
-    required void Function(String audioPath) sendAudioMessage,
+    required void Function(String mediaPath) sendMediaMessage,
   })? sendMessageBuilder;
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
@@ -36,7 +36,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final ChatService _chatService = ChatService();
   final ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
-  bool _isLoadingMore = false;
+  final ValueNotifier<bool> _isLoadingMore = ValueNotifier(false);
   Message? _lastMessage;
   bool _hasMoreMessages = true;
   late final String chatId;
@@ -49,6 +49,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _fetchInitialMessages();
     _markMessagesAsRead();
     _scrollController.addListener(_onScroll);
+    _isLoadingMore.addListener(() {
+      setState(() {});
+    });
   }
 
   Future<void> _fetchInitialMessages() async {
@@ -76,8 +79,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _loadMoreMessages() async {
-    if (_isLoadingMore || !_hasMoreMessages || _lastMessage == null) return;
-    setState(() => _isLoadingMore = true);
+    if (_isLoadingMore.value || !_hasMoreMessages || _lastMessage == null)
+      return;
+    _isLoadingMore.value = true;
 
     List<Message> olderMessages = await _chatService.fetchMessages(
         _chatService.getChatId(widget.senderId, widget.receiverId),
@@ -88,10 +92,10 @@ class _ChatScreenState extends State<ChatScreen> {
         _lastMessage = olderMessages.last;
       });
     } else {
-      setState(() => _hasMoreMessages = false);
+      _hasMoreMessages = false;
     }
 
-    setState(() => _isLoadingMore = false);
+    _isLoadingMore.value = false;
   }
 
   void _sendMessage(String text) {
@@ -108,7 +112,7 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatService.sendMessage(message);
   }
 
-  void _sendAudioMessage(String? audioPath) async {
+  void _sendMediaMessage(String? audioPath) async {
     if (audioPath == null) return;
     final path = await widget.mediaUploaderFunction?.call(audioPath);
     if (path == null) return;
@@ -126,9 +130,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _onScroll() {
-    double threshold = 5.0;
+    double threshold = 50.0;
     if (_scrollController.position.pixels <= threshold &&
-        !_isLoadingMore &&
+        !_isLoadingMore.value &&
         _hasMoreMessages) {
       _loadMoreMessages();
     }
@@ -140,28 +144,28 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           MessageList(
-            messageBubble: ({required isMe, required message}) => MessageBubble(
-              isMe: isMe,
-              message: message,
-            ),
+            messageBubble: ({required isMe, required message}) =>
+                widget.messageBubbleBuilder?.call(
+                  message: message,
+                  isMe: isMe,
+                ) ??
+                MessageBubble(
+                  isMe: isMe,
+                  message: message,
+                ),
             messages: _messages,
             senderId: widget.senderId,
             scrollController: _scrollController,
-            isLoadingMore: _isLoadingMore,
+            isLoadingMore: _isLoadingMore.value,
           ),
-          if (_isLoadingMore)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: CircularProgressIndicator(),
-            ),
           widget.sendMessageBuilder?.call(
                 context,
                 sendMessage: _sendMessage,
-                sendAudioMessage: _sendAudioMessage,
+                sendMediaMessage: _sendMediaMessage,
               ) ??
               MessageInput(
                 onSendMessage: _sendMessage,
-                onSendAudioMessage: _sendAudioMessage,
+                onSendAudioMessage: _sendMediaMessage,
               ),
         ],
       ),
