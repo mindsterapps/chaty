@@ -4,6 +4,15 @@ enum MessageStatus {
   read,
 }
 
+enum MessageType {
+  text,
+  audio,
+  voice,
+  image,
+  document,
+  video,
+}
+
 class Message {
   final String messageId;
   final String senderId;
@@ -12,6 +21,7 @@ class Message {
   final String? mediaUrl;
   final DateTime timestamp;
   final MessageStatus status; // Added status field
+  final MessageType type; // Added type field
 
   Message({
     required this.messageId,
@@ -20,7 +30,8 @@ class Message {
     required this.text,
     this.mediaUrl,
     required this.timestamp,
-    required this.status, // Initialize status
+    required this.status,
+    required this.type,
   });
 
   // Convert Message to a Map for Firestore storage
@@ -32,7 +43,8 @@ class Message {
       'text': text,
       'mediaUrl': mediaUrl,
       'timestamp': timestamp.toIso8601String(),
-      'status': status.toString().split('.').last, // Save as string
+      'status': status.toString().split('.').last,
+      'type': type.toString().split('.').last,
     };
   }
 
@@ -47,8 +59,11 @@ class Message {
       timestamp: DateTime.parse(map['timestamp']),
       status: MessageStatus.values.firstWhere(
         (e) => e.toString().split('.').last == map['status'],
-        orElse: () =>
-            MessageStatus.unread, // Default to unread if status is missing
+        orElse: () => MessageStatus.unread,
+      ),
+      type: MessageType.values.firstWhere(
+        (e) => e.toString().split('.').last == map['type'],
+        orElse: () => MessageType.text,
       ),
     );
   }

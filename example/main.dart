@@ -157,8 +157,8 @@ class _SendMessageWidget extends StatelessWidget {
     required this.sendMessage,
     required this.sendAudioMessage,
   }) : _messageController = messageController;
-  final void Function(String) sendMessage;
-  final void Function(String) sendAudioMessage;
+  final void Function(String msg) sendMessage;
+  final void Function(String msg, MessageType type) sendAudioMessage;
   final TextEditingController _messageController;
 
   @override
@@ -171,7 +171,7 @@ class _SendMessageWidget extends StatelessWidget {
             icon: const Icon(Icons.mic, color: Colors.red),
             onPressed: () {
               // Send audio message
-              sendAudioMessage('audio_path');
+              sendAudioMessage('audio_path', MessageType.voice);
             },
           ),
           Expanded(

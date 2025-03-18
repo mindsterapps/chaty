@@ -13,7 +13,7 @@ class ChatScreen extends StatefulWidget {
   final Widget Function(
     BuildContext context, {
     required void Function(String txt) sendMessage,
-    required void Function(String mediaPath) sendMediaMessage,
+    required void Function(String mediaPath, MessageType type) sendMediaMessage,
   })? sendMessageBuilder;
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
@@ -105,6 +105,7 @@ class _ChatScreenState extends State<ChatScreen> {
       receiverId: widget.receiverId,
       text: text,
       mediaUrl: null,
+      type: MessageType.text,
       timestamp: DateTime.now(),
       status: MessageStatus.unread,
     );
@@ -112,15 +113,16 @@ class _ChatScreenState extends State<ChatScreen> {
     _chatService.sendMessage(message);
   }
 
-  void _sendMediaMessage(String? audioPath) async {
-    if (audioPath == null) return;
-    final path = await widget.mediaUploaderFunction?.call(audioPath);
+  void _sendMediaMessage(String? mediaPath, MessageType type) async {
+    if (mediaPath == null) return;
+    final path = await widget.mediaUploaderFunction?.call(mediaPath);
     if (path == null) return;
     Message message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
       receiverId: widget.receiverId,
       text: '',
+      type: type,
       mediaUrl: path,
       timestamp: DateTime.now(),
       status: MessageStatus.unread,
@@ -144,15 +146,29 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           MessageList(
-            messageBubble: ({required isMe, required message}) =>
-                widget.messageBubbleBuilder?.call(
-                  message: message,
-                  isMe: isMe,
-                ) ??
-                MessageBubble(
-                  isMe: isMe,
-                  message: message,
-                ),
+            messageBubble: ({required isMe, required message}) => Dismissible(
+              key: Key(message.messageId), // Unique key for each message
+              background: Container(
+                color: Colors.red,
+                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Icon(Icons.delete, color: Colors.white),
+              ),
+              direction: isMe
+                  ? DismissDirection.endToStart
+                  : DismissDirection.startToEnd,
+              onDismissed: (direction) {
+                _chatService.deleteMessage(chatId, message.messageId);
+              },
+              child: widget.messageBubbleBuilder?.call(
+                    message: message,
+                    isMe: isMe,
+                  ) ??
+                  MessageBubble(
+                    isMe: isMe,
+                    message: message,
+                  ),
+            ),
             messages: _messages,
             senderId: widget.senderId,
             scrollController: _scrollController,

@@ -1,3 +1,4 @@
+import 'package:chaty/models/message.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -6,7 +7,7 @@ import 'package:path_provider/path_provider.dart';
 
 class MessageInput extends StatefulWidget {
   final Function(String text) onSendMessage;
-  final Function(String? audioPath) onSendAudioMessage;
+  final Function(String? audioPath, MessageType type) onSendAudioMessage;
 
   const MessageInput({
     Key? key,
@@ -53,7 +54,7 @@ class _MessageInputState extends State<MessageInput> {
   Future<void> _stopRecording() async {
     await _audioRecorder!.stopRecorder();
     setState(() => _isRecording = false);
-    widget.onSendAudioMessage(_audioPath);
+    widget.onSendAudioMessage(_audioPath, MessageType.voice);
   }
 
   void _sendMessage() {
