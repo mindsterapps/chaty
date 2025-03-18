@@ -47,30 +47,28 @@ class _ChatScreenState extends State<ChatScreen> {
     chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
     super.initState();
     _fetchInitialMessages();
-    _markMessagesAsRead();
     _scrollController.addListener(_onScroll);
-    _isLoadingMore.addListener(() {
-      setState(() {});
-    });
   }
 
   Future<void> _fetchInitialMessages() async {
     _chatService.streamLatestMessages(chatId).listen((newMessages) {
-      setState(() {
-        if (_messages.isEmpty) {
-          _messages = newMessages;
-        } else {
-          for (var msg in newMessages) {
-            if (!_messages.any((m) => m.messageId == msg.messageId)) {
-              _messages.insert(0, msg);
+      if (mounted) {
+        setState(() {
+          if (_messages.isEmpty) {
+            _messages = List.from(newMessages);
+          } else {
+            for (var msg in newMessages) {
+              if (!_messages.any((m) => m.messageId == msg.messageId)) {
+                _messages.insert(0, msg);
+              }
             }
           }
-        }
-        if (_messages.isNotEmpty) {
-          _lastMessage = _messages.last;
-        }
-      });
-      _markMessagesAsRead();
+          if (_messages.isNotEmpty) {
+            _lastMessage = _messages.last;
+          }
+        });
+        _markMessagesAsRead();
+      }
     });
   }
 
@@ -84,11 +82,13 @@ class _ChatScreenState extends State<ChatScreen> {
     _isLoadingMore.value = true;
 
     List<Message> olderMessages = await _chatService.fetchMessages(
-        _chatService.getChatId(widget.senderId, widget.receiverId),
-        lastMessage: _lastMessage);
+      chatId,
+      lastMessage: _lastMessage,
+    );
+
     if (olderMessages.isNotEmpty) {
       setState(() {
-        _messages.addAll(olderMessages);
+        _messages.addAll(olderMessages.reversed); // Append at the end
         _lastMessage = olderMessages.last;
       });
     } else {
@@ -117,6 +117,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (mediaPath == null) return;
     final path = await widget.mediaUploaderFunction?.call(mediaPath);
     if (path == null) return;
+
     Message message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
@@ -132,11 +133,39 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _onScroll() {
-    double threshold = 50.0;
+    if (!_scrollController.hasClients) return;
+
+    double threshold =
+        MediaQuery.of(context).size.height * 0.2; // 20% of screen height
     if (_scrollController.position.pixels <= threshold &&
         !_isLoadingMore.value &&
         _hasMoreMessages) {
       _loadMoreMessages();
+    }
+  }
+
+  void _confirmDeleteMessage(String messageId) async {
+    bool confirmDelete = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Delete Message?"),
+        content: Text("Are you sure you want to delete this message?"),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text("Cancel")),
+          TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text("Delete")),
+        ],
+      ),
+    );
+
+    if (confirmDelete) {
+      _chatService.deleteMessage(chatId, messageId);
+      setState(() {
+        _messages.removeWhere((msg) => msg.messageId == messageId);
+      });
     }
   }
 
@@ -145,34 +174,37 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       body: Column(
         children: [
-          MessageList(
-            messageBubble: ({required isMe, required message}) => Dismissible(
-              key: Key(message.messageId), // Unique key for each message
-              background: Container(
-                color: Colors.red,
-                alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Icon(Icons.delete, color: Colors.white),
+          Expanded(
+            child: MessageList(
+              messageBubble: ({required isMe, required message}) => Dismissible(
+                key: Key(message.messageId),
+                background: Container(
+                  color: Colors.red,
+                  alignment:
+                      isMe ? Alignment.centerRight : Alignment.centerLeft,
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  child: Icon(Icons.delete, color: Colors.white),
+                ),
+                direction: isMe
+                    ? DismissDirection.endToStart
+                    : DismissDirection.startToEnd,
+                onDismissed: (direction) {
+                  _confirmDeleteMessage(message.messageId);
+                },
+                child: widget.messageBubbleBuilder?.call(
+                      message: message,
+                      isMe: isMe,
+                    ) ??
+                    MessageBubble(
+                      isMe: isMe,
+                      message: message,
+                    ),
               ),
-              direction: isMe
-                  ? DismissDirection.endToStart
-                  : DismissDirection.startToEnd,
-              onDismissed: (direction) {
-                _chatService.deleteMessage(chatId, message.messageId);
-              },
-              child: widget.messageBubbleBuilder?.call(
-                    message: message,
-                    isMe: isMe,
-                  ) ??
-                  MessageBubble(
-                    isMe: isMe,
-                    message: message,
-                  ),
+              messages: _messages,
+              senderId: widget.senderId,
+              scrollController: _scrollController,
+              isLoadingMore: _isLoadingMore.value,
             ),
-            messages: _messages,
-            senderId: widget.senderId,
-            scrollController: _scrollController,
-            isLoadingMore: _isLoadingMore.value,
           ),
           widget.sendMessageBuilder?.call(
                 context,
