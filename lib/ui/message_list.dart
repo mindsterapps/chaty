@@ -31,7 +31,7 @@ class MessageList extends StatelessWidget {
           return KeyedSubtree(
             key: ValueKey(messages[index].messageId),
             child: Dismissible(
-              secondaryBackground: Container(
+              background: Container(
                 color: Colors.red,
                 child: Align(
                   child: Padding(
