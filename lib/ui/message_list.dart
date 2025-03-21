@@ -37,8 +37,8 @@ class MessageList extends StatelessWidget {
               ),
               onDismissed: (direction) =>
                   onDismiss(messageId: messages[index].messageId, index: index),
-              child: ListTile(
-                title: messageBubble(
+              child: Semantics(
+                child: messageBubble(
                   message: messages[index],
                   isMe: messages[index].senderId == senderId,
                 ),
