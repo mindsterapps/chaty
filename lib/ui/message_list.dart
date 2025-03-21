@@ -6,6 +6,8 @@ class MessageList extends StatelessWidget {
   final String senderId;
   final ScrollController scrollController;
   final bool isLoadingMore;
+  final void Function({required String messageId, required int index})
+      onDismiss;
   final Widget Function({required Message message, required bool isMe})
       messageBubble;
   const MessageList({
@@ -15,6 +17,7 @@ class MessageList extends StatelessWidget {
     required this.scrollController,
     required this.isLoadingMore,
     required this.messageBubble,
+    required this.onDismiss,
   }) : super(key: key);
 
   @override
@@ -25,9 +28,27 @@ class MessageList extends StatelessWidget {
         reverse: true,
         itemCount: messages.length,
         itemBuilder: (context, index) {
-          return messageBubble(
-            message: messages[index],
-            isMe: messages[index].senderId == senderId,
+          return KeyedSubtree(
+            key: ValueKey(messages[index].messageId),
+            child: Dismissible(
+              secondaryBackground: Container(
+                color: Colors.red,
+                child: Align(
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Icon(Icons.delete),
+                  ),
+                  alignment: Alignment.centerRight,
+                ),
+              ),
+              onDismissed: (direction) =>
+                  onDismiss(messageId: messages[index].messageId, index: index),
+              key: ValueKey(messages[index].timestamp),
+              child: messageBubble(
+                message: messages[index],
+                isMe: messages[index].senderId == senderId,
+              ),
+            ),
           );
         },
       ),
