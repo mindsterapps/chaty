@@ -31,22 +31,17 @@ class MessageList extends StatelessWidget {
           return KeyedSubtree(
             key: ValueKey(messages[index].messageId),
             child: Dismissible(
+              key: ValueKey(messages[index].timestamp),
               background: Container(
                 color: Colors.red,
-                child: Align(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Icon(Icons.delete),
-                  ),
-                  alignment: Alignment.centerRight,
-                ),
               ),
               onDismissed: (direction) =>
                   onDismiss(messageId: messages[index].messageId, index: index),
-              key: ValueKey(messages[index].timestamp),
-              child: messageBubble(
-                message: messages[index],
-                isMe: messages[index].senderId == senderId,
+              child: ListTile(
+                title: messageBubble(
+                  message: messages[index],
+                  isMe: messages[index].senderId == senderId,
+                ),
               ),
             ),
           );
