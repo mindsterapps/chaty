@@ -28,29 +28,43 @@ class MessageList extends StatelessWidget {
         reverse: true,
         itemCount: messages.length,
         itemBuilder: (context, index) {
-          return KeyedSubtree(
-            key: ValueKey(messages[index].messageId),
-            child: Dismissible(
-              background: Container(
-                color: Colors.red,
-                child: Align(
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Icon(Icons.delete),
-                  ),
-                  alignment: Alignment.centerRight,
-                ),
-              ),
-              onDismissed: (direction) =>
-                  onDismiss(messageId: messages[index].messageId, index: index),
-              key: ValueKey(messages[index].timestamp),
-              child: messageBubble(
-                message: messages[index],
-                isMe: messages[index].senderId == senderId,
-              ),
-            ),
-          );
+          final message = messages[index];
+          return _Tile(
+              onLongPress: () {
+                onDismiss(messageId: message.messageId, index: index);
+              },
+              message: message,
+              messageBubble: messageBubble,
+              senderId: senderId);
         },
+      ),
+    );
+  }
+}
+
+class _Tile extends StatelessWidget {
+  const _Tile({
+    required this.message,
+    required this.messageBubble,
+    required this.senderId,
+    required this.onLongPress,
+  });
+
+  final Message message;
+  final Widget Function({required bool isMe, required Message message})
+      messageBubble;
+  final String senderId;
+  final VoidCallback onLongPress;
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: ValueKey(message.messageId),
+      child: GestureDetector(
+        onLongPress: onLongPress,
+        child: messageBubble(
+          message: message,
+          isMe: message.senderId == senderId,
+        ),
       ),
     );
   }
