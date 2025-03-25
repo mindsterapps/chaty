@@ -65,6 +65,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       builder: (context) => ChatScreen(
                         senderId: widget.currentUserId,
                         receiverId: chat.otherUserId,
+                        intialChatLimit: 15,
                       ),
                     ),
                   );

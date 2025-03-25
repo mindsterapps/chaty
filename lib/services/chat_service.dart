@@ -18,14 +18,24 @@ class ChatService {
 
     await messageRef.set(message.toMap());
 
-    // Update chat summary for chat list
+    // Determine last message text based on type
+    String lastMessageText = message.text.isNotEmpty
+        ? message.text
+        : (message.type == MessageType.image
+            ? "📷 Image"
+            : message.type == MessageType.audio
+                ? "🎵 Audio"
+                : message.type == MessageType.video
+                    ? "📹 Video"
+                    : "📎 File");
+
+    // Update chat summary
     await _firestore.collection('chats').doc(chatId).set({
-      'lastMessage': message.text.isNotEmpty ? message.text : "Media Message",
+      'lastMessage': lastMessageText,
+      'lastMessageType':
+          message.type.toString().split('.').last, // Store type as string
       'lastMessageTime': message.timestamp,
-      'users': [
-        message.senderId,
-        message.receiverId
-      ], // Store chat participants
+      'users': [message.senderId, message.receiverId],
     }, SetOptions(merge: true));
   }
 
