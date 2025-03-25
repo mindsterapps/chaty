@@ -1,5 +1,6 @@
 import 'package:chaty/models/message.dart';
 import 'package:chaty/services/notification_services.dart';
+import 'package:chaty/ui/chat_list_screen.dart';
 import 'package:chaty/ui/chat_screen.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -99,6 +100,58 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: const Text("Start Chat"),
             ),
+            ElevatedButton(
+                onPressed: () {
+                  ChatListScreen(
+                    currentUserId: _user1Controller.text,
+                    chatTileBuilder: ({required chatSummary}) {
+                      return ListTile(
+                        title: Text("Chat with ${chatSummary.otherUserId}"),
+                        subtitle: Text(chatSummary.lastMessage),
+                        trailing: Text(chatSummary.lastMessageTime
+                            .toDate()
+                            .toLocal()
+                            .toString()
+                            .split(' ')[0]),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChatScreen(
+                                senderId: _user1Controller.text,
+                                receiverId: chatSummary.otherUserId,
+                                mediaUploaderFunction: (mediaPath) async {
+                                  // Upload media to cloud storage
+                                  return Future.microtask(
+                                      () => 'media_url.aac');
+                                },
+                                messageBubbleBuilder: (
+                                    {required isMe, required message}) {
+                                  return _MessageBubble(
+                                    isMe: isMe,
+                                    message: message,
+                                  );
+                                },
+                                sendMessageBuilder: (
+                                  context, {
+                                  required sendMediaMessage,
+                                  required sendMessage,
+                                }) {
+                                  return _SendMessageWidget(
+                                    messageController: _messageController,
+                                    sendMessage: sendMessage,
+                                    sendAudioMessage: sendMediaMessage,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+                child: Text('show list'))
           ],
         ),
       ),

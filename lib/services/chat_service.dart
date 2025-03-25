@@ -1,3 +1,4 @@
+import 'package:chaty/models/chat_summary.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -176,21 +177,19 @@ class ChatService {
     );
   }
 
-  Stream<List<Map<String, dynamic>>> getUserChats(String userId) {
+  Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users',
-            arrayContains: userId) // Get chats where the user is included
-        .orderBy('lastMessageTime', descending: true) // Sort by latest message
+        .where('users', arrayContains: userId)
+        .orderBy('lastMessageTime', descending: true)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return {
-          "chatId": doc.id,
-          "lastMessage": doc["lastMessage"],
-          "lastMessageTime": doc["lastMessageTime"],
-          "users": doc["users"],
-        };
+        final data = doc.data();
+        return ChatSummary.fromMap(
+          {...data, "chatId": doc.id}, // Add chatId to the map
+          userId,
+        );
       }).toList();
     });
   }

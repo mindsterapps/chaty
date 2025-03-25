@@ -1,67 +1,56 @@
 import 'package:flutter/material.dart';
 import '../services/chat_service.dart';
+import '../models/chat_summary.dart';
 import 'chat_screen.dart';
 
-class ChatListScreen extends StatefulWidget {
+class ChatListScreen extends StatelessWidget {
   final String currentUserId;
   final ChatService _chatService = ChatService();
+  final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
 
-  ChatListScreen({Key? key, required this.currentUserId}) : super(key: key);
-
-  @override
-  _ChatListScreenState createState() => _ChatListScreenState();
-}
-
-class _ChatListScreenState extends State<ChatListScreen> {
-  List<Map<String, dynamic>> _cachedChats = []; // Store chats locally
+  ChatListScreen({Key? key, required this.currentUserId, this.chatTileBuilder})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
-      body: StreamBuilder<List<Map<String, dynamic>>>(
-        stream: widget._chatService.getUserChats(widget.currentUserId),
+      body: StreamBuilder<List<ChatSummary>>(
+        stream: _chatService.getUserChats(currentUserId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              _cachedChats.isEmpty) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasData && snapshot.data != null) {
-            _cachedChats = snapshot.data!; // Update cache when new data arrives
-          }
-
-          if (_cachedChats.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(child: Text("No chats yet."));
           }
 
-          return ListView.builder(
-            itemCount: _cachedChats.length,
-            itemBuilder: (context, index) {
-              final chat = _cachedChats[index];
-              final otherUserId = chat["users"].firstWhere(
-                  (id) => id != widget.currentUserId,
-                  orElse: () => "Unknown User");
+          List<ChatSummary> chats = snapshot.data!;
 
+          return ListView.builder(
+            itemCount: chats.length,
+            itemBuilder: (context, index) {
+              final chat = chats[index];
+
+              if (chatTileBuilder != null) {
+                return chatTileBuilder!(chatSummary: chat);
+              }
               return ListTile(
-                title: Text("Chat with $otherUserId"),
-                subtitle: Text(chat["lastMessage"] ?? ""),
-                trailing: Text(
-                  chat["lastMessageTime"] != null
-                      ? chat["lastMessageTime"]
-                          .toDate()
-                          .toLocal()
-                          .toString()
-                          .split(' ')[0]
-                      : "N/A",
-                ),
+                title: Text("Chat with ${chat.otherUserId}"),
+                subtitle: Text(chat.lastMessage),
+                trailing: Text(chat.lastMessageTime
+                    .toDate()
+                    .toLocal()
+                    .toString()
+                    .split(' ')[0]),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
-                        senderId: widget.currentUserId,
-                        receiverId: otherUserId,
+                        senderId: currentUserId,
+                        receiverId: chat.otherUserId,
                       ),
                     ),
                   );

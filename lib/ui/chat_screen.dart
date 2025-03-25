@@ -43,7 +43,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   void initState() {
-    _chatService.initialLimit = widget.intialChatLimit ?? 5;
+    _chatService.initialLimit = widget.intialChatLimit ?? 15;
     chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
     super.initState();
     _fetchInitialMessages();
