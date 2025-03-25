@@ -3,38 +3,52 @@ import '../services/chat_service.dart';
 import '../models/chat_summary.dart';
 import 'chat_screen.dart';
 
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   final String currentUserId;
-  final ChatService _chatService = ChatService();
   final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
 
   ChatListScreen({Key? key, required this.currentUserId, this.chatTileBuilder})
       : super(key: key);
 
   @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
+  final ChatService _chatService = ChatService();
+
+  List<ChatSummary> _cachedChats = [];
+  // Cached chat list
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
       body: StreamBuilder<List<ChatSummary>>(
-        stream: _chatService.getUserChats(currentUserId),
+        stream: _chatService.getUserChats(widget.currentUserId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              _cachedChats.isEmpty) {
+            return Center(
+                child: CircularProgressIndicator()); // Show loader initially
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (snapshot.hasData && snapshot.data != null) {
+            _cachedChats = snapshot.data!; // Update cache when new data arrives
+          }
+
+          if (_cachedChats.isEmpty) {
             return Center(child: Text("No chats yet."));
           }
 
-          List<ChatSummary> chats = snapshot.data!;
+          List<ChatSummary> chats = _cachedChats;
 
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];
 
-              if (chatTileBuilder != null) {
-                return chatTileBuilder!(chatSummary: chat);
+              if (widget.chatTileBuilder != null) {
+                return widget.chatTileBuilder!(chatSummary: chat);
               }
               return ListTile(
                 title: Text("Chat with ${chat.otherUserId}"),
@@ -49,7 +63,7 @@ class ChatListScreen extends StatelessWidget {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
-                        senderId: currentUserId,
+                        senderId: widget.currentUserId,
                         receiverId: chat.otherUserId,
                       ),
                     ),
