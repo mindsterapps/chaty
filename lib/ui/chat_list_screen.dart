@@ -15,9 +15,16 @@ class ChatListScreen extends StatelessWidget {
       body: StreamBuilder<List<Map<String, dynamic>>>(
         stream: _chatService.getUserChats(currentUserId),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              !snapshot.hasData)
-            return Center(child: CircularProgressIndicator());
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+                child: CircularProgressIndicator()); // Show loader initially
+          }
+
+          if (!snapshot.hasData ||
+              snapshot.data == null ||
+              snapshot.data!.isEmpty) {
+            return Center(child: Text("No chats yet."));
+          }
           List<Map<String, dynamic>> chats = snapshot.data!;
 
           if (chats.isEmpty) return Center(child: Text("No chats yet."));
