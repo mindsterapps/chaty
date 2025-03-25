@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,13 +8,24 @@ class ChatService {
 
   /// Send a new message
   Future<void> sendMessage(Message message) async {
+    final chatId = getChatId(message.senderId, message.receiverId);
     DocumentReference messageRef = _firestore
         .collection('chats')
-        .doc(getChatId(message.senderId, message.receiverId))
+        .doc(chatId)
         .collection('messages')
         .doc(message.messageId);
 
     await messageRef.set(message.toMap());
+
+    // Update chat summary for chat list
+    await _firestore.collection('chats').doc(chatId).set({
+      'lastMessage': message.text.isNotEmpty ? message.text : "Media Message",
+      'lastMessageTime': message.timestamp,
+      'users': [
+        message.senderId,
+        message.receiverId
+      ], // Store chat participants
+    }, SetOptions(merge: true));
   }
 
   late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
@@ -167,5 +176,22 @@ class ChatService {
     );
   }
 
-  String uploadAudio(File audioFile) => '';
+  Stream<List<Map<String, dynamic>>> getUserChats(String userId) {
+    return _firestore
+        .collection('chats')
+        .where('users',
+            arrayContains: userId) // Get chats where the user is included
+        .orderBy('lastMessageTime', descending: true) // Sort by latest message
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        return {
+          "chatId": doc.id,
+          "lastMessage": doc["lastMessage"],
+          "lastMessageTime": doc["lastMessageTime"],
+          "users": doc["users"],
+        };
+      }).toList();
+    });
+  }
 }
