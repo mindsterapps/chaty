@@ -1,6 +1,7 @@
 import 'package:chaty/models/message.dart';
 import 'package:chaty/services/notification_services.dart';
 import 'package:chaty/ui/chat_screen.dart';
+import 'package:chaty/utils/extensions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -141,7 +142,7 @@ class _MessageBubble extends StatelessWidget {
               ),
             const SizedBox(height: 5),
             Text(
-              message.timestamp.toIso8601String(),
+              message.timestamp.timeAgo(),
               style: const TextStyle(fontSize: 12),
             ),
           ],
