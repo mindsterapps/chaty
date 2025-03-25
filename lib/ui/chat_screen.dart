@@ -88,7 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (olderMessages.isNotEmpty) {
       setState(() {
-        _messages.addAll(olderMessages.reversed); // Append at the end
+        _messages.addAll(olderMessages); // Append at the end
         _lastMessage = olderMessages.last;
       });
     } else {
