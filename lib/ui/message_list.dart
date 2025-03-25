@@ -24,6 +24,7 @@ class MessageList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
+        cacheExtent: 10000,
         controller: scrollController,
         reverse: true,
         itemCount: messages.length,
