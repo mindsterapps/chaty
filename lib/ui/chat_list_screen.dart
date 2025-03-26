@@ -27,65 +27,57 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Chats")),
-      body: Column(
-        children: [
-          widget.topWidget ?? Container(),
-          StreamBuilder<List<ChatSummary>>(
-            stream: _chatService.getUserChats(widget.currentUserId),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting &&
-                  _cachedChats.isEmpty) {
-                return Center(
-                    child:
-                        CircularProgressIndicator()); // Show loader initially
+      body: StreamBuilder<List<ChatSummary>>(
+        stream: _chatService.getUserChats(widget.currentUserId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting &&
+              _cachedChats.isEmpty) {
+            return Center(
+                child: CircularProgressIndicator()); // Show loader initially
+          }
+
+          if (snapshot.hasData && snapshot.data != null) {
+            _cachedChats = snapshot.data!; // Update cache when new data arrives
+          }
+
+          if (_cachedChats.isEmpty) {
+            return Center(child: Text("No chats yet."));
+          }
+
+          List<ChatSummary> chats = _cachedChats;
+
+          return ListView.builder(
+            itemCount: chats.length,
+            itemBuilder: (context, index) {
+              final chat = chats[index];
+
+              if (widget.chatTileBuilder != null) {
+                return widget.chatTileBuilder!(chatSummary: chat);
               }
-
-              if (snapshot.hasData && snapshot.data != null) {
-                _cachedChats =
-                    snapshot.data!; // Update cache when new data arrives
-              }
-
-              if (_cachedChats.isEmpty) {
-                return Center(child: Text("No chats yet."));
-              }
-
-              List<ChatSummary> chats = _cachedChats;
-
-              return ListView.builder(
-                itemCount: chats.length,
-                itemBuilder: (context, index) {
-                  final chat = chats[index];
-
-                  if (widget.chatTileBuilder != null) {
-                    return widget.chatTileBuilder!(chatSummary: chat);
-                  }
-                  return ListTile(
-                    title: Text("Chat with ${chat.otherUserId}"),
-                    subtitle: Text(chat.lastMessage),
-                    trailing: Text(chat.lastMessageTime
-                        .toDate()
-                        .toLocal()
-                        .toString()
-                        .split(' ')[0]),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ChatScreen(
-                            senderId: widget.currentUserId,
-                            receiverId: chat.otherUserId,
-                            intialChatLimit: 15,
-                          ),
-                        ),
-                      );
-                    },
+              return ListTile(
+                title: Text("Chat with ${chat.otherUserId}"),
+                subtitle: Text(chat.lastMessage),
+                trailing: Text(chat.lastMessageTime
+                    .toDate()
+                    .toLocal()
+                    .toString()
+                    .split(' ')[0]),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ChatScreen(
+                        senderId: widget.currentUserId,
+                        receiverId: chat.otherUserId,
+                        intialChatLimit: 15,
+                      ),
+                    ),
                   );
                 },
               );
             },
-          ),
-        ],
+          );
+        },
       ),
     );
   }
