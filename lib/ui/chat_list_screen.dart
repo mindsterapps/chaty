@@ -6,9 +6,14 @@ import 'chat_screen.dart';
 class ChatListScreen extends StatefulWidget {
   final String currentUserId;
   final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
+  final Widget? topWidget;
 
-  ChatListScreen({Key? key, required this.currentUserId, this.chatTileBuilder})
-      : super(key: key);
+  ChatListScreen({
+    Key? key,
+    required this.currentUserId,
+    this.chatTileBuilder,
+    this.topWidget,
+  }) : super(key: key);
 
   @override
   State<ChatListScreen> createState() => _ChatListScreenState();
@@ -23,57 +28,64 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Chats")),
-      body: StreamBuilder<List<ChatSummary>>(
-        stream: _chatService.getUserChats(widget.currentUserId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting &&
-              _cachedChats.isEmpty) {
-            return Center(
-                child: CircularProgressIndicator()); // Show loader initially
-          }
-
-          if (snapshot.hasData && snapshot.data != null) {
-            _cachedChats = snapshot.data!; // Update cache when new data arrives
-          }
-
-          if (_cachedChats.isEmpty) {
-            return Center(child: Text("No chats yet."));
-          }
-
-          List<ChatSummary> chats = _cachedChats;
-
-          return ListView.builder(
-            itemCount: chats.length,
-            itemBuilder: (context, index) {
-              final chat = chats[index];
-
-              if (widget.chatTileBuilder != null) {
-                return widget.chatTileBuilder!(chatSummary: chat);
+      body: Column(
+        children: [
+          widget.topWidget ?? Container(),
+          StreamBuilder<List<ChatSummary>>(
+            stream: _chatService.getUserChats(widget.currentUserId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting &&
+                  _cachedChats.isEmpty) {
+                return Center(
+                    child:
+                        CircularProgressIndicator()); // Show loader initially
               }
-              return ListTile(
-                title: Text("Chat with ${chat.otherUserId}"),
-                subtitle: Text(chat.lastMessage),
-                trailing: Text(chat.lastMessageTime
-                    .toDate()
-                    .toLocal()
-                    .toString()
-                    .split(' ')[0]),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ChatScreen(
-                        senderId: widget.currentUserId,
-                        receiverId: chat.otherUserId,
-                        intialChatLimit: 15,
-                      ),
-                    ),
+
+              if (snapshot.hasData && snapshot.data != null) {
+                _cachedChats =
+                    snapshot.data!; // Update cache when new data arrives
+              }
+
+              if (_cachedChats.isEmpty) {
+                return Center(child: Text("No chats yet."));
+              }
+
+              List<ChatSummary> chats = _cachedChats;
+
+              return ListView.builder(
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  final chat = chats[index];
+
+                  if (widget.chatTileBuilder != null) {
+                    return widget.chatTileBuilder!(chatSummary: chat);
+                  }
+                  return ListTile(
+                    title: Text("Chat with ${chat.otherUserId}"),
+                    subtitle: Text(chat.lastMessage),
+                    trailing: Text(chat.lastMessageTime
+                        .toDate()
+                        .toLocal()
+                        .toString()
+                        .split(' ')[0]),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(
+                            senderId: widget.currentUserId,
+                            receiverId: chat.otherUserId,
+                            intialChatLimit: 15,
+                          ),
+                        ),
+                      );
+                    },
                   );
                 },
               );
             },
-          );
-        },
+          ),
+        ],
       ),
     );
   }

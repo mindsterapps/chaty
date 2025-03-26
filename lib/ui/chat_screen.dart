@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chaty/ui/message_bubble.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
@@ -18,7 +19,7 @@ class ChatScreen extends StatefulWidget {
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
-  final Function(String lastSeen)? getLastSeen;
+  final Function(Timestamp? lastSeen)? getLastSeen;
   final Function()? onDeleteMessage;
   const ChatScreen({
     required this.senderId,
@@ -57,7 +58,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _fetchlastseen() async {
     final lastSeen = _chatService.updateLastSeen(widget.senderId);
-    widget.getLastSeen?.call(lastSeen.toString());
+    widget.getLastSeen?.call(await lastSeen);
   }
 
   Future<void> _fetchInitialMessages() async {
