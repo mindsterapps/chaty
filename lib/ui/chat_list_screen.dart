@@ -5,14 +5,13 @@ import 'chat_screen.dart';
 
 class ChatListScreen extends StatefulWidget {
   final String currentUserId;
+
   final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
-  final Widget? topWidget;
 
   ChatListScreen({
     Key? key,
     required this.currentUserId,
     this.chatTileBuilder,
-    this.topWidget,
   }) : super(key: key);
 
   @override
@@ -67,6 +66,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
+                        senderName:'' ,
                         senderId: widget.currentUserId,
                         receiverId: chat.otherUserId,
                         intialChatLimit: 15,

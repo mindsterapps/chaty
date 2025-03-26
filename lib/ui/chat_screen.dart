@@ -10,6 +10,7 @@ import 'message_input.dart';
 class ChatScreen extends StatefulWidget {
   final String senderId;
   final String receiverId;
+  final String senderName;
   final int? intialChatLimit;
   final Widget Function(
     BuildContext context, {
@@ -31,6 +32,7 @@ class ChatScreen extends StatefulWidget {
     Key? key,
     this.getLastSeen,
     this.onDeleteMessage,
+    required this.senderName,
   }) : super(key: key);
 
   @override
