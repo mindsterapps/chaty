@@ -18,6 +18,8 @@ class ChatScreen extends StatefulWidget {
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
+  final Function(String lastSeen)? getLastSeen;
+  final Function()? onDeleteMessage;
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
@@ -26,6 +28,8 @@ class ChatScreen extends StatefulWidget {
     this.mediaUploaderFunction,
     this.intialChatLimit,
     Key? key,
+    this.getLastSeen,
+    this.onDeleteMessage,
   }) : super(key: key);
 
   @override
@@ -47,7 +51,13 @@ class _ChatScreenState extends State<ChatScreen> {
     chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
     super.initState();
     _fetchInitialMessages();
+    _fetchlastseen();
     _scrollController.addListener(_onScroll);
+  }
+
+  Future<void> _fetchlastseen() async {
+    final lastSeen = _chatService.updateLastSeen(widget.senderId);
+    widget.getLastSeen?.call(lastSeen.toString());
   }
 
   Future<void> _fetchInitialMessages() async {
@@ -163,9 +173,11 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (confirmDelete) {
       _chatService.deleteMessage(chatId, messageId);
+
       setState(() {
         _messages.removeWhere((msg) => msg.messageId == messageId);
       });
+      widget.onDeleteMessage?.call();
     }
   }
 

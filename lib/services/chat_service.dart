@@ -39,6 +39,23 @@ class ChatService {
     }, SetOptions(merge: true));
   }
 
+  Future<Timestamp?> updateLastSeen(String userId) async {
+    try {
+      await _firestore.collection('users').doc(userId).set(
+        {'lastSeen': FieldValue.serverTimestamp()},
+        SetOptions(merge: true),
+      );
+
+      // Retrieve the updated document to get the lastSeen timestamp
+      DocumentSnapshot userDoc =
+          await _firestore.collection('users').doc(userId).get();
+      return userDoc['lastSeen'] as Timestamp?;
+    } catch (e) {
+      print("Error updating last seen: $e");
+      return null;
+    }
+  }
+
   late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
 
   /// Fetch messages in real-time
