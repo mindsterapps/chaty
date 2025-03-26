@@ -2,7 +2,6 @@ import 'package:chaty/models/message.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:flutter_sound/flutter_sound.dart';
 import 'package:path_provider/path_provider.dart';
 
 class MessageInput extends StatefulWidget {
@@ -21,7 +20,6 @@ class MessageInput extends StatefulWidget {
 
 class _MessageInputState extends State<MessageInput> {
   final TextEditingController _messageController = TextEditingController();
-  FlutterSoundRecorder? _audioRecorder;
   bool _isRecording = false;
   String? _audioPath;
 
@@ -32,27 +30,21 @@ class _MessageInputState extends State<MessageInput> {
   }
 
   Future<void> _initRecorder() async {
-    _audioRecorder = FlutterSoundRecorder();
-
     var status = await Permission.microphone.request();
     if (status != PermissionStatus.granted) {
       "❌ Microphone permission not granted".log();
       return;
     }
-
-    await _audioRecorder!.openRecorder();
   }
 
   Future<void> _startRecording() async {
     final dir = await getApplicationDocumentsDirectory();
     _audioPath =
         '${dir.path}/audio_${DateTime.now().millisecondsSinceEpoch}.aac';
-    await _audioRecorder!.startRecorder(toFile: _audioPath);
     setState(() => _isRecording = true);
   }
 
   Future<void> _stopRecording() async {
-    await _audioRecorder!.stopRecorder();
     setState(() => _isRecording = false);
     widget.onSendAudioMessage(_audioPath, MessageType.voice);
   }

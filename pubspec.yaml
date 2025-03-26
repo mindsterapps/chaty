@@ -16,7 +16,6 @@ dependencies:
   provider:
   permission_handler:
   path_provider:
-  flutter_sound:
   firebase_core:
 
 dev_dependencies:
