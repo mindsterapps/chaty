@@ -101,7 +101,7 @@ extension WrapIt on Widget {
 
 extension Logger<E> on E {
   E log([String key = '@']) {
-    if (kDebugMode) d.log('$key:${toString()}');
+    d.log('$key:${toString()}');
     return this;
   }
 }

@@ -32,8 +32,7 @@ class ChatService {
     // Update chat summary
     await _firestore.collection('chats').doc(chatId).set({
       'lastMessage': lastMessageText,
-      'lastMessageType':
-          message.type.toString().split('.').last, // Store type as string
+      'lastMessageType': message.type.toString(),
       'lastMessageTime': message.timestamp,
       'users': [message.senderId, message.receiverId],
     }, SetOptions(merge: true));
@@ -207,17 +206,17 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContains: userId)
+        .where('users', arrayContainsAny: [userId])
         .orderBy('lastMessageTime', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return ChatSummary.fromMap(
-          {...data, "chatId": doc.id}, // Add chatId to the map
-          userId,
-        );
-      }).toList();
-    });
+          return snapshot.log('snapshot').docs.map((doc) {
+            final data = doc.data();
+            return ChatSummary.fromMap(
+              {...data, "chatId": doc.id}, // Add chatId to the map
+              userId,
+            );
+          }).toList();
+        });
   }
 }
