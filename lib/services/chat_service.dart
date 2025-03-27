@@ -217,7 +217,7 @@ class ChatService {
                 chatId: doc.id,
                 lastMessage: data['lastMessage'],
                 lastMessageType: MessageType.text,
-                lastMessageTime: data['lastMessageTime'],
+                lastMessageTime: DateTime.now(),
                 users: List<String>.from(data['users']),
                 otherUserId: List<String>.from(data['users']).firstWhere(
                     (id) => id != userId,
