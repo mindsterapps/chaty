@@ -33,7 +33,7 @@ class ChatService {
     await _firestore.collection('chats').doc(chatId).set({
       'lastMessage': lastMessageText,
       'lastMessageType': message.type.toString(),
-      'lastMessageTime': message.timestamp,
+      'lastMessageTime': FieldValue.serverTimestamp(),
       'users': [message.senderId, message.receiverId],
     }, SetOptions(merge: true));
   }
