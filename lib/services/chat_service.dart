@@ -206,17 +206,16 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContainsAny: [userId])
-        .orderBy('lastMessageTime', descending: true)
+        .where('users', arrayContains: userId)
         .snapshots()
         .map((snapshot) {
-          return snapshot.log('snapshot').docs.map((doc) {
-            final data = doc.data();
-            return ChatSummary.fromMap(
-              {...data, "chatId": doc.id}, // Add chatId to the map
-              userId,
-            );
-          }).toList();
-        });
+      return snapshot.log('snapshot').docs.map((doc) {
+        final data = doc.data();
+        return ChatSummary.fromMap(
+          {...data, "chatId": doc.id}, // Add chatId to the map
+          userId,
+        );
+      }).toList();
+    });
   }
 }
