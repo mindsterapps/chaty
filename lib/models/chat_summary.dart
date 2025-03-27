@@ -1,3 +1,4 @@
+import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart'; // Import MessageType from Message model
 
@@ -8,6 +9,7 @@ class ChatSummary {
   final DateTime lastMessageTime; // Changed to DateTime
   final List<String> users;
   final String otherUserId;
+  final String lastMessageSenderId;
 
   ChatSummary({
     required this.chatId,
@@ -16,11 +18,13 @@ class ChatSummary {
     required this.lastMessageTime,
     required this.users,
     required this.otherUserId,
+    required this.lastMessageSenderId,
   });
 
   factory ChatSummary.fromMap(Map<String, dynamic> map, String currentUserId) {
     try {
       return ChatSummary(
+        lastMessageSenderId: map['lastMessageSender'] ?? "Unknown",
         chatId: map['chatId'] ?? "",
         lastMessage: map['lastMessage'] ?? "No message",
         lastMessageType: MessageType.values.firstWhere(
@@ -40,7 +44,7 @@ class ChatSummary {
                 orElse: () => "Unknown User"),
       );
     } catch (e) {
-      print("❌ Error converting Firestore data to ChatSummary: $e");
+      e.log("❌ Error converting Firestore data to ChatSummary");
       return ChatSummary(
         chatId: "",
         lastMessage: "Error loading message",
@@ -48,6 +52,7 @@ class ChatSummary {
         lastMessageTime: DateTime.now(),
         users: [],
         otherUserId: "Unknown",
+        lastMessageSenderId: 'Unknown',
       );
     }
   }

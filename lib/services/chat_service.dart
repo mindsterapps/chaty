@@ -34,6 +34,7 @@ class ChatService {
       'lastMessage': lastMessageText,
       'lastMessageType': message.type.toString(),
       'lastMessageTime': FieldValue.serverTimestamp(),
+      'lastMessageSender': message.senderId, // Store sender's ID
       'users': [message.senderId, message.receiverId],
     }, SetOptions(merge: true));
   }
@@ -212,6 +213,7 @@ class ChatService {
           return snapshot.docs.map((doc) {
             final data = doc.data().log('snapshot');
             return ChatSummary(
+                lastMessageSenderId: data['lastMessageSender'],
                 chatId: doc.id,
                 lastMessage: data['lastMessage'],
                 lastMessageType: MessageType.text,
