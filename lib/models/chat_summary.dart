@@ -5,7 +5,7 @@ class ChatSummary {
   final String chatId;
   final String lastMessage;
   final MessageType lastMessageType; // Use the same MessageType enum
-  final Timestamp lastMessageTime;
+  final DateTime lastMessageTime;
   final List<String> users;
   final String otherUserId;
 

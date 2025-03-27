@@ -110,7 +110,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: Text("Chat with ${chatSummary.otherUserId}"),
                         subtitle: Text(chatSummary.lastMessage),
                         trailing: Text(chatSummary.lastMessageTime
-                            .toDate()
                             .toLocal()
                             .toString()
                             .split(' ')[0]),

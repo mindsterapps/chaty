@@ -56,17 +56,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
               return ListTile(
                 title: Text("Chat with ${chat.otherUserId}"),
                 subtitle: Text(chat.lastMessage),
-                trailing: Text(chat.lastMessageTime
-                    .toDate()
-                    .toLocal()
-                    .toString()
-                    .split(' ')[0]),
+                trailing: Text(
+                    chat.lastMessageTime.toLocal().toString().split(' ')[0]),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
-                        senderName:'' ,
+                        senderName: '',
                         senderId: widget.currentUserId,
                         receiverId: chat.otherUserId,
                         intialChatLimit: 15,
