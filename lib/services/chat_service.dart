@@ -214,15 +214,13 @@ class ChatService {
             return ChatSummary(
                 chatId: doc.id,
                 lastMessage: data['lastMessage'],
-                lastMessageType: MessageType.values.firstWhere(
-                  (e) => e.toString() == data['lastMessageType'],
-                  orElse: () => MessageType.text,
-                ),
+                lastMessageType: MessageType.text,
                 lastMessageTime: data['lastMessageTime'],
                 users: List<String>.from(data['users']),
                 otherUserId: List<String>.from(data['users']).firstWhere(
                     (id) => id != userId,
-                    orElse: () => "Unknown User"));
+                    orElse: () => "Unknown User"))
+              ..toString().log('chat');
           }).toList();
         });
   }
