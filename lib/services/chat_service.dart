@@ -211,10 +211,18 @@ class ChatService {
         .map((snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data().log('snapshot');
-            return ChatSummary.fromMap(
-              {...data, "chatId": doc.id}, // Add chatId to the map
-              userId,
-            );
+            return ChatSummary(
+                chatId: doc.id,
+                lastMessage: data['lastMessage'],
+                lastMessageType: MessageType.values.firstWhere(
+                  (e) => e.toString() == data['lastMessageType'],
+                  orElse: () => MessageType.text,
+                ),
+                lastMessageTime: data['lastMessageTime'],
+                users: List<String>.from(data['users']),
+                otherUserId: List<String>.from(data['users']).firstWhere(
+                    (id) => id != userId,
+                    orElse: () => "Unknown User"));
           }).toList();
         });
   }
