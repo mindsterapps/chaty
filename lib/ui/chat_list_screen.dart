@@ -1,3 +1,4 @@
+import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import '../services/chat_service.dart';
 import '../models/chat_summary.dart';
@@ -57,7 +58,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 title: Text("Chat with ${chat.otherUserId}"),
                 subtitle: Text(chat.lastMessage),
                 trailing: Text(
-                    chat.lastMessageTime.toLocal().toString().split(' ')[0]),
+                    chat.lastMessageTime.toLocal().toString().log('last message time').split(' ')[1]),
                 onTap: () {
                   Navigator.push(
                     context,
