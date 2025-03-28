@@ -1,5 +1,4 @@
 import 'package:chaty/utils/extensions.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart'; // Import MessageType from Message model
 
 class ChatSummary {
@@ -33,10 +32,9 @@ class ChatSummary {
               (map['lastMessageType'] ?? "text"),
           orElse: () => MessageType.text,
         ),
-        lastMessageTime: (map['lastMessageTime'] is Timestamp)
-            ? (map['lastMessageTime'] as Timestamp)
-                .toDate() // Convert Timestamp to DateTime
-            : DateTime.now(), // Ensure valid DateTime
+
+        lastMessageTime: DateTime.parse(
+            map['lastMessageTime'].toString()), // Ensure valid DateTime
         users: List<String>.from(map['users'] ?? []),
         otherUserId: (map['users'] as List<dynamic>)
             .map((e) => e.toString())
