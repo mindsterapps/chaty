@@ -39,21 +39,27 @@ class ChatService {
     }, SetOptions(merge: true));
   }
 
-  Future<Timestamp?> updateLastSeen(String userId) async {
+  Future<void> updateLastSeen(String userId) async {
     try {
       await _firestore.collection('users').doc(userId).set(
         {'lastSeen': FieldValue.serverTimestamp()},
         SetOptions(merge: true),
       );
-
-      // Retrieve the updated document to get the lastSeen timestamp
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
-      return userDoc['lastSeen'] as Timestamp?;
     } catch (e) {
-      print("Error updating last seen: $e");
-      return null;
+      e.log("Error updating last seen:");
     }
+  }
+
+  Stream<Timestamp?> getLastSeen(String userId) {
+    // Retrieve the updated document to get the lastSeen timestamp
+    Stream<DocumentSnapshot<Map<String, dynamic>>> userDoc =
+        _firestore.collection('users').doc(userId).snapshots();
+    return userDoc.map((snapshot) {
+      if (snapshot.exists) {
+        return snapshot.data()!['lastSeen'] as Timestamp;
+      }
+      return null;
+    });
   }
 
   late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
@@ -133,6 +139,18 @@ class ChatService {
 
   /// Generate a unique chat ID based on user IDs
   String getChatId(String user1, String user2) {
+    /// Generates a unique identifier for a chat between two users based on their hash codes.
+    ///
+    /// The identifier is created by comparing the hash codes of the two user IDs.
+    /// If the hash code of `user1` is less than or equal to the hash code of `user2`,
+    /// the identifier is formatted as `"$user1_$user2"`. Otherwise, it is formatted
+    /// as `"$user2_$user1"`.
+    ///
+    /// This ensures that the order of the user IDs does not affect the generated identifier,
+    /// making it consistent regardless of the order in which the users are provided.
+    ///
+    /// Returns:
+    /// A string representing the unique identifier for the chat.
     return user1.hashCode <= user2.hashCode
         ? "$user1\_$user2"
         : "$user2\_$user1";

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:chaty/ui/message_bubble.dart';
-import 'package:chaty/utils/build_methoda.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
@@ -10,7 +9,6 @@ import 'message_input.dart';
 class ChatScreen extends StatefulWidget {
   final String senderId;
   final String receiverId;
-  final String senderName;
   final int? intialChatLimit;
   final Widget Function(
     BuildContext context, {
@@ -32,7 +30,6 @@ class ChatScreen extends StatefulWidget {
     Key? key,
     this.getLastSeen,
     this.onDeleteMessage,
-    required this.senderName,
   }) : super(key: key);
 
   @override
@@ -55,12 +52,23 @@ class _ChatScreenState extends State<ChatScreen> {
     super.initState();
     _fetchInitialMessages();
     _fetchlastseen();
+    _chatService.updateLastSeen(widget.senderId);
     _scrollController.addListener(_onScroll);
   }
 
+  @override
+  void didUpdateWidget(covariant ChatScreen oldWidget) {
+    _chatService.updateLastSeen(widget.senderId);
+    super.didUpdateWidget(oldWidget);
+  }
+
   Future<void> _fetchlastseen() async {
-    final lastSeen = _chatService.updateLastSeen(widget.senderId);
-    widget.getLastSeen?.call(convertTimetampToDateTime(await lastSeen)  );
+    final lastSeen = _chatService.getLastSeen(widget.receiverId);
+    lastSeen.listen((event) {
+      if (event != null) {
+        widget.getLastSeen?.call(event.toDate());
+      }
+    });
   }
 
   Future<void> _fetchInitialMessages() async {

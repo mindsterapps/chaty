@@ -63,7 +63,6 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => ChatScreen(
-                        senderName: '',
                         senderId: widget.currentUserId,
                         receiverId: chat.otherUserId,
                         intialChatLimit: 15,

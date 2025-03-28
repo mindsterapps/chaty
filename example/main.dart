@@ -70,7 +70,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => ChatScreen(
-                      senderName: 'user1',
                       senderId: _user1Controller.text,
                       receiverId: _user2Controller.text,
                       mediaUploaderFunction: (mediaPath) async {
@@ -118,7 +117,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => ChatScreen(
-                                senderName: 'user12',
                                 senderId: _user1Controller.text,
                                 receiverId: chatSummary.otherUserId,
                                 mediaUploaderFunction: (mediaPath) async {
