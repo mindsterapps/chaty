@@ -1,4 +1,5 @@
 import 'package:chaty/utils/extensions.dart';
+import 'package:intl/intl.dart';
 import 'message.dart'; // Import MessageType from Message model
 
 class ChatSummary {
@@ -21,6 +22,9 @@ class ChatSummary {
   });
 
   factory ChatSummary.fromMap(Map<String, dynamic> map, String currentUserId) {
+    // Define the date format pattern
+    DateFormat format = DateFormat("d MMMM yyyy 'at' HH:mm:ss 'UTC'X");
+
     try {
       return ChatSummary(
         lastMessageSenderId: map['lastMessageSender'] ?? "Unknown",
@@ -33,8 +37,8 @@ class ChatSummary {
           orElse: () => MessageType.text,
         ),
 
-        lastMessageTime: DateTime.parse(
-            map['lastMessageTime'].toString()), // Ensure valid DateTime
+        lastMessageTime: format.parse(
+            map['lastMessageTime'].toString(), true), // Ensure valid DateTime
         users: List<String>.from(map['users'] ?? []),
         otherUserId: (map['users'] as List<dynamic>)
             .map((e) => e.toString())
