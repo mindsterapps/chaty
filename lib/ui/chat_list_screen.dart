@@ -20,7 +20,7 @@ class ChatListScreen extends StatefulWidget {
 }
 
 class _ChatListScreenState extends State<ChatListScreen> {
-  final ChatService _chatService = ChatService();
+  final ChatService _chatService = ChatService.instance;
 
   List<ChatSummary> _cachedChats = [];
   // Cached chat list

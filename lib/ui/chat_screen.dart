@@ -37,7 +37,7 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final ChatService _chatService = ChatService();
+  final ChatService _chatService = ChatService.instance;
   final ScrollController _scrollController = ScrollController();
   List<Message> _messages = [];
   final ValueNotifier<bool> _isLoadingMore = ValueNotifier(false);

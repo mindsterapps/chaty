@@ -5,6 +5,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/message.dart';
 
 class ChatService {
+  // Singleton instance
+  static final ChatService instance = ChatService._internal();
+
+  // Private constructor
+  ChatService._internal();
+
+  // Factory constructor to return the singleton instance
+  factory ChatService() {
+    return instance;
+  }
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Send a new message
