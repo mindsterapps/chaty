@@ -230,17 +230,22 @@ class ChatService {
         .map((snapshot) {
           return snapshot.docs.map((doc) {
             final data = doc.data().log('snapshot');
-            return ChatSummary(
-                lastMessageSenderId: data['lastMessageSender'],
-                chatId: doc.id,
-                lastMessage: data['lastMessage'],
-                lastMessageType: MessageType.text,
-                lastMessageTime: DateTime.now(),
-                users: List<String>.from(data['users']),
-                otherUserId: List<String>.from(data['users']).firstWhere(
-                    (id) => id != userId,
-                    orElse: () => "Unknown User"))
-              ..toString().log('chat');
+
+            return ChatSummary.fromMap(
+              data,
+              userId,
+            );
+            // return ChatSummary(
+            //     lastMessageSenderId: data['lastMessageSender'],
+            //     chatId: doc.id,
+            //     lastMessage: data['lastMessage'],
+            //     lastMessageType: MessageType.text,
+            //     lastMessageTime: DateTime.now(),
+            //     users: List<String>.from(data['users']),
+            //     otherUserId: List<String>.from(data['users']).firstWhere(
+            //         (id) => id != userId,
+            //         orElse: () => "Unknown User"))
+            //   ..toString().log('chat');
           }).toList();
         });
   }
