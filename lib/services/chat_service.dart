@@ -30,13 +30,14 @@ class ChatService {
                     : "📎 File");
 
     // Update chat summary
-    await _firestore.collection('chats').doc(chatId).set({
+    await _firestore.collection('chats').doc(chatId).update({
       'lastMessage': lastMessageText,
       'lastMessageType': message.type.toString(),
       'lastMessageTime': FieldValue.serverTimestamp(),
       'lastMessageSender': message.senderId, // Store sender's ID
       'users': [message.senderId, message.receiverId],
-    }, SetOptions(merge: true));
+      'unreadCount': FieldValue.increment(1), // ✅ Increase unread count
+    });
   }
 
   Future<void> updateLastSeen(String userId) async {
@@ -200,6 +201,11 @@ class ChatService {
     for (var doc in messages.docs) {
       doc.reference.update({'status': 'read'});
     }
+
+    // ✅ Reset unread count to 0 when user opens chat
+    FirebaseFirestore.instance.collection('chats').doc(chatId).update({
+      'unreadCount': 0,
+    });
   }
 
   /// Update typing status in Firestore
@@ -235,17 +241,6 @@ class ChatService {
               data,
               userId,
             );
-            // return ChatSummary(
-            //     lastMessageSenderId: data['lastMessageSender'],
-            //     chatId: doc.id,
-            //     lastMessage: data['lastMessage'],
-            //     lastMessageType: MessageType.text,
-            //     lastMessageTime: DateTime.now(),
-            //     users: List<String>.from(data['users']),
-            //     otherUserId: List<String>.from(data['users']).firstWhere(
-            //         (id) => id != userId,
-            //         orElse: () => "Unknown User"))
-            //   ..toString().log('chat');
           }).toList();
         });
   }

@@ -55,10 +55,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 return widget.chatTileBuilder!(chatSummary: chat);
               }
               return ListTile(
+                leading: chat.unreadCount > 0
+                    ? CircleAvatar(
+                        backgroundColor: Colors.red,
+                        radius: 6,
+                      )
+                    : SizedBox(), // ✅ Show dot if unreadCount > 0,
                 title: Text("Chat with ${chat.otherUserId}"),
                 subtitle: Text(chat.lastMessage),
-                trailing: Text(
-                    chat.lastMessageTime.toLocal().toString().log('last message time').split(' ')[1]),
+                trailing: Text(chat.lastMessageTime
+                    .toLocal()
+                    .toString()
+                    .log('last message time')
+                    .split(' ')[1]),
                 onTap: () {
                   Navigator.push(
                     context,

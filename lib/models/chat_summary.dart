@@ -6,10 +6,11 @@ class ChatSummary {
   final String chatId;
   final String lastMessage;
   final MessageType lastMessageType;
-  final DateTime lastMessageTime; // Changed to DateTime
+  final DateTime lastMessageTime;
   final List<String> users;
   final String otherUserId;
   final String lastMessageSenderId;
+  final int unreadCount; // 🔥 Added unreadCount
 
   ChatSummary({
     required this.chatId,
@@ -19,26 +20,35 @@ class ChatSummary {
     required this.users,
     required this.otherUserId,
     required this.lastMessageSenderId,
+    required this.unreadCount, // 🔥 Initialize unreadCount
   });
 
   factory ChatSummary.fromMap(Map<String, dynamic> map, String currentUserId) {
     try {
       return ChatSummary(
-        lastMessageSenderId: map['lastMessageSender'] ?? "Unknown",
         chatId: map['chatId'] ?? "",
         lastMessage: map['lastMessage'] ?? "No message",
-        lastMessageType: MessageType.values.firstWhere(
-          (e) =>
-              e.toString().split('.').last ==
-              (map['lastMessageType'] ?? "text"),
-          orElse: () => MessageType.text,
-        ),
-        lastMessageTime: (map['lastMessageTime'] as Timestamp).toDate(),
+        lastMessageSenderId: map['lastMessageSender'] ?? "Unknown",
+        lastMessageType: MessageType.values.any((e) =>
+                e.toString().split('.').last ==
+                (map['lastMessageType'] ?? "text"))
+            ? MessageType.values.firstWhere(
+                (e) =>
+                    e.toString().split('.').last ==
+                    (map['lastMessageType'] ?? "text"),
+              )
+            : MessageType.text,
+        lastMessageTime:
+            (map['lastMessageTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
         users: List<String>.from(map['users'] ?? []),
-        otherUserId: (map['users'] as List<dynamic>)
-            .map((e) => e.toString())
-            .firstWhere((id) => id != currentUserId,
-                orElse: () => "Unknown User"),
+        otherUserId: (map['users'] is List && (map['users'] as List).isNotEmpty)
+            ? (map['users'] as List<dynamic>)
+                .map((e) => e.toString())
+                .firstWhere((id) => id != currentUserId,
+                    orElse: () => "Unknown")
+            : "Unknown",
+        unreadCount:
+            map['unreadCount'] ?? 0, // 🔥 Fetch unread count from Firestore
       );
     } catch (e) {
       e.log("❌ Error converting Firestore data to ChatSummary");
@@ -50,7 +60,21 @@ class ChatSummary {
         users: [],
         otherUserId: "Unknown",
         lastMessageSenderId: 'Unknown',
+        unreadCount: 0, // 🔥 Default unread count to 0
       );
     }
+  }
+
+  // Convert model to Firestore map
+  Map<String, dynamic> toMap() {
+    return {
+      'chatId': chatId,
+      'lastMessage': lastMessage,
+      'lastMessageType': lastMessageType.toString().split('.').last,
+      'lastMessageTime': lastMessageTime,
+      'users': users,
+      'lastMessageSender': lastMessageSenderId,
+      'unreadCount': unreadCount, // 🔥 Store unreadCount in Firestore
+    };
   }
 }
