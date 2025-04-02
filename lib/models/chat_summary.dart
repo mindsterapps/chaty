@@ -38,7 +38,8 @@ class ChatSummary {
         ),
 
         lastMessageTime: format.parse(
-            map['lastMessageTime'].toString(), true), // Ensure valid DateTime
+            map['lastMessageTime'].toString().log('lastMessageTime'),
+            true), // Ensure valid DateTime
         users: List<String>.from(map['users'] ?? []),
         otherUserId: (map['users'] as List<dynamic>)
             .map((e) => e.toString())
