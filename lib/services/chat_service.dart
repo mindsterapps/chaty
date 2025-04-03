@@ -241,7 +241,7 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContains : [userId])
+        .where('users', arrayContainsAny : [userId])
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
