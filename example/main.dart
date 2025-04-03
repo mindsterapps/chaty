@@ -104,7 +104,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 onPressed: () {
                   ChatListScreen(
                     currentUserId: _user1Controller.text,
-                    chatTileBuilder: ({required chatSummary,  }) {
+                    chatTileBuilder: ({
+                      required chatSummary,
+                    }) {
                       return ListTile(
                         title: Text("Chat with ${chatSummary.otherUserId}"),
                         subtitle: Text(chatSummary.lastMessage),
@@ -148,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       );
                     },
+                    getnumberOfusers: (int numberOfusers) {},
                   );
                 },
                 child: Text('show list'))

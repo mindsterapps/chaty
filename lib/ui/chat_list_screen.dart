@@ -8,13 +8,13 @@ class ChatListScreen extends StatefulWidget {
   final String currentUserId;
 
   final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
-  final Function(int numberOfusers)? getnumberOfusers;
+  final Function(int numberOfusers) getnumberOfusers;
 
   ChatListScreen({
     Key? key,
     required this.currentUserId,
     this.chatTileBuilder,
-    this.getnumberOfusers,
+    required this.getnumberOfusers,
   }) : super(key: key);
 
   @override
@@ -52,7 +52,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
-              widget.getnumberOfusers ?? (chats.length);
+              widget.getnumberOfusers(chats.length);
               final chat = chats[index];
 
               if (widget.chatTileBuilder != null) {
