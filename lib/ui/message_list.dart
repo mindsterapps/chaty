@@ -153,7 +153,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
         itemBuilder: (context, index) {
           final message = _messages[index];
           return GestureDetector(
-            key: ValueKey(message.messageId),
             onLongPress: () => _confirmDeleteMessage(message.messageId),
             child: widget.messageBubbleBuilder?.call(
                   message: message,
