@@ -31,7 +31,7 @@ class ChatMessageList extends StatefulWidget {
 class _ChatMessageListState extends State<ChatMessageList> {
   final ChatService _chatService = ChatService.instance;
   final ScrollController _scrollController = ScrollController();
-  late final ValueNotifier<List<Message>> _messages = ValueNotifier([]);
+  final List<Message> _messages = [];
 
   final ValueNotifier<bool> _isLoadingMore = ValueNotifier(false);
   Message? _lastMessage;
@@ -56,12 +56,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
       if (!mounted) return;
       setState(() {
         for (var msg in newMessages) {
-          if (!_messages.value.any((m) => m.messageId == msg.messageId)) {
-            _messages.value.insert(0, msg);
+          if (!_messages.any((m) => m.messageId == msg.messageId)) {
+            _messages.insert(0, msg);
           }
         }
-        if (_messages.value.isNotEmpty) {
-          _lastMessage = _messages.value.last;
+        if (_messages.isNotEmpty) {
+          _lastMessage = _messages.last;
         }
       });
       _chatService.markMessagesAsRead(chatId, widget.senderId);
@@ -88,7 +88,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
     if (olderMessages.isNotEmpty) {
       setState(() {
-        _messages.value.addAll(olderMessages);
+        _messages.addAll(olderMessages);
         _lastMessage = olderMessages.last;
       });
     } else {
@@ -129,7 +129,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
     if (confirm) {
       await _chatService.deleteMessage(chatId, messageId);
       setState(() {
-        _messages.value.removeWhere((msg) => msg.messageId == messageId);
+        _messages.removeWhere((msg) => msg.messageId == messageId);
       });
       widget.onDeleteMessage?.call();
     }
@@ -145,32 +145,25 @@ class _ChatMessageListState extends State<ChatMessageList> {
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ValueListenableBuilder<List<Message>>(
-          valueListenable: _messages,
-          builder: (context, messages, _) {
-            return ListView.builder(
-              cacheExtent: 10000,
-              controller: _scrollController,
-              reverse: true,
-              itemCount: _messages.value.length,
-              itemBuilder: (context, index) {
-                final message = _messages.value[index];
-                return KeyedSubtree(
-                  key: ValueKey(message.messageId),
-                  child: GestureDetector(
-                    onLongPress: () => _confirmDeleteMessage(message.messageId),
-                    child: widget.messageBubbleBuilder?.call(
-                          message: message,
-                          isMe: message.senderId == widget.senderId,
-                        ) ??
-                        MessageBubble(
-                            isMe: message.senderId == widget.senderId,
-                            message: message),
-                  ),
-                );
-              },
-            );
-          }),
+      child: ListView.builder(
+        cacheExtent: 10000,
+        controller: _scrollController,
+        reverse: true,
+        itemCount: _messages.length,
+        itemBuilder: (context, index) {
+          final message = _messages[index];
+          return GestureDetector(
+            onLongPress: () => _confirmDeleteMessage(message.messageId),
+            child: widget.messageBubbleBuilder?.call(
+                  message: message,
+                  isMe: message.senderId == widget.senderId,
+                ) ??
+                MessageBubble(
+                    isMe: message.senderId == widget.senderId,
+                    message: message),
+          );
+        },
+      ),
     );
   }
 }
