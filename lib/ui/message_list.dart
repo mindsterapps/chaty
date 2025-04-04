@@ -55,13 +55,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
         _chatService.streamLatestMessages(chatId).listen((newMessages) {
       if (!mounted) return;
       setState(() {
-        for (var msg in newMessages) {
+        for (var msg in newMessages.reversed) {
           if (!_messages.any((m) => m.messageId == msg.messageId)) {
             _messages.insert(0, msg);
           }
         }
         if (_messages.isNotEmpty) {
-          _lastMessage = _messages.last;
+          _lastMessage = newMessages.last;
         }
       });
       _chatService.markMessagesAsRead(chatId, widget.senderId);
