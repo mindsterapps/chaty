@@ -242,15 +242,29 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContains: userId) // Changed to arrayContains
+        .where('users', arrayContains: userId)
         .snapshots()
+        .handleError(
+            (error) => debugPrint('Firestore Error: $error')) // Error handling
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        debugPrint(
-            'Chat document: ${doc.id} - ${data.toString()}'); // Added debug
-        return ChatSummary.fromMap(data, userId);
-      }).toList();
+      debugPrint('Total docs received: ${snapshot.docs.length}'); // Debug count
+      return snapshot.docs
+          .map((doc) {
+            debugPrint('Processing doc ${doc.id} with data: ${doc.data()}');
+            if (!doc.data().containsKey('users')) {
+              debugPrint('Document ${doc.id} missing users field!');
+              return null;
+            }
+
+            try {
+              return ChatSummary.fromMap(doc.data(), userId);
+            } catch (e) {
+              debugPrint('Error parsing doc ${doc.id}: $e');
+              return null;
+            }
+          })
+          .where((item) => item != null)
+          .toList() as List<ChatSummary>;
     });
   }
 }
