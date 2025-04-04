@@ -31,7 +31,8 @@ class ChatMessageList extends StatefulWidget {
 class _ChatMessageListState extends State<ChatMessageList> {
   final ChatService _chatService = ChatService.instance;
   final ScrollController _scrollController = ScrollController();
-  List<Message> _messages = [];
+  late final ValueNotifier<List<Message>> _messages = ValueNotifier([]);
+
   final ValueNotifier<bool> _isLoadingMore = ValueNotifier(false);
   Message? _lastMessage;
   bool _hasMoreMessages = true;
@@ -55,12 +56,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
       if (!mounted) return;
       setState(() {
         for (var msg in newMessages) {
-          if (!_messages.any((m) => m.messageId == msg.messageId)) {
-            _messages.insert(0, msg);
+          if (!_messages.value.any((m) => m.messageId == msg.messageId)) {
+            _messages.value.insert(0, msg);
           }
         }
-        if (_messages.isNotEmpty) {
-          _lastMessage = _messages.last;
+        if (_messages.value.isNotEmpty) {
+          _lastMessage = _messages.value.last;
         }
       });
       _chatService.markMessagesAsRead(chatId, widget.senderId);
@@ -87,7 +88,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
     if (olderMessages.isNotEmpty) {
       setState(() {
-        _messages.addAll(olderMessages);
+        _messages.value.addAll(olderMessages);
         _lastMessage = olderMessages.last;
       });
     } else {
@@ -128,7 +129,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
     if (confirm) {
       await _chatService.deleteMessage(chatId, messageId);
       setState(() {
-        _messages.removeWhere((msg) => msg.messageId == messageId);
+        _messages.value.removeWhere((msg) => msg.messageId == messageId);
       });
       widget.onDeleteMessage?.call();
     }
@@ -143,62 +144,34 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
   @override
   Widget build(BuildContext context) {
-    return MessageList(
-      messages: _messages,
-      senderId: widget.senderId,
-      scrollController: _scrollController,
-      isLoadingMore: _isLoadingMore.value,
-      messageBubble: ({required isMe, required message}) =>
-          widget.messageBubbleBuilder?.call(
-            message: message,
-            isMe: isMe,
-          ) ??
-          MessageBubble(isMe: isMe, message: message),
-      onDismiss: ({required index, required messageId}) {
-        _confirmDeleteMessage(messageId);
-      },
-    );
-  }
-}
-
-class MessageList extends StatelessWidget {
-  final List<Message> messages;
-  final String senderId;
-  final ScrollController scrollController;
-  final bool isLoadingMore;
-  final void Function({required String messageId, required int index})
-      onDismiss;
-  final Widget Function({required Message message, required bool isMe})
-      messageBubble;
-  const MessageList({
-    Key? key,
-    required this.messages,
-    required this.senderId,
-    required this.scrollController,
-    required this.isLoadingMore,
-    required this.messageBubble,
-    required this.onDismiss,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-        cacheExtent: 10000,
-        controller: scrollController,
-        reverse: true,
-        itemCount: messages.length,
-        itemBuilder: (context, index) {
-          final message = messages[index];
-          return _Tile(
-              onLongPress: () {
-                onDismiss(messageId: message.messageId, index: index);
+      child: ValueListenableBuilder<List<Message>>(
+          valueListenable: _messages,
+          builder: (context, messages, _) {
+            return ListView.builder(
+              cacheExtent: 10000,
+              controller: _scrollController,
+              reverse: true,
+              itemCount: _messages.value.length,
+              itemBuilder: (context, index) {
+                final message = _messages.value[index];
+                return KeyedSubtree(
+                  key: ValueKey(message.messageId),
+                  child: _Tile(
+                      onLongPress: () =>
+                          _confirmDeleteMessage(message.messageId),
+                      message: message,
+                      messageBubble: ({required isMe, required message}) =>
+                          widget.messageBubbleBuilder?.call(
+                            message: message,
+                            isMe: isMe,
+                          ) ??
+                          MessageBubble(isMe: isMe, message: message),
+                      senderId: widget.senderId),
+                );
               },
-              message: message,
-              messageBubble: messageBubble,
-              senderId: senderId);
-        },
-      ),
+            );
+          }),
     );
   }
 }
@@ -218,14 +191,11 @@ class _Tile extends StatelessWidget {
   final VoidCallback onLongPress;
   @override
   Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: ValueKey(message.messageId),
-      child: GestureDetector(
-        onLongPress: onLongPress,
-        child: messageBubble(
-          message: message,
-          isMe: message.senderId == senderId,
-        ),
+    return GestureDetector(
+      onLongPress: onLongPress,
+      child: messageBubble(
+        message: message,
+        isMe: message.senderId == senderId,
       ),
     );
   }

@@ -48,11 +48,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
           }
 
           List<ChatSummary> chats = _cachedChats;
-
+          widget.getnumberOfusers(chats.length);
           return ListView.builder(
             itemCount: chats.length,
             itemBuilder: (context, index) {
-              widget.getnumberOfusers(chats.length);
               final chat = chats[index];
 
               if (widget.chatTileBuilder != null) {
