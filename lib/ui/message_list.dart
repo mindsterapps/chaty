@@ -58,6 +58,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
         for (var msg in newMessages) {
           if (!_messages.value.any((m) => m.messageId == msg.messageId)) {
             _messages.value.insert(0, msg);
+            _messages.notifyListeners();
           }
         }
         if (_messages.value.isNotEmpty) {
@@ -90,6 +91,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
       setState(() {
         _messages.value.addAll(olderMessages);
         _lastMessage = olderMessages.last;
+        _messages.notifyListeners();
       });
     } else {
       _hasMoreMessages = false;
@@ -157,46 +159,20 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final message = _messages.value[index];
                 return KeyedSubtree(
                   key: ValueKey(message.messageId),
-                  child: _Tile(
-                      onLongPress: () =>
-                          _confirmDeleteMessage(message.messageId),
-                      message: message,
-                      messageBubble: ({required isMe, required message}) =>
-                          widget.messageBubbleBuilder?.call(
-                            message: message,
-                            isMe: isMe,
-                          ) ??
-                          MessageBubble(isMe: isMe, message: message),
-                      senderId: widget.senderId),
+                  child: GestureDetector(
+                    onLongPress: () => _confirmDeleteMessage(message.messageId),
+                    child: widget.messageBubbleBuilder?.call(
+                          message: message,
+                          isMe: message.senderId == widget.senderId,
+                        ) ??
+                        MessageBubble(
+                            isMe: message.senderId == widget.senderId,
+                            message: message),
+                  ),
                 );
               },
             );
           }),
-    );
-  }
-}
-
-class _Tile extends StatelessWidget {
-  const _Tile({
-    required this.message,
-    required this.messageBubble,
-    required this.senderId,
-    required this.onLongPress,
-  });
-
-  final Message message;
-  final Widget Function({required bool isMe, required Message message})
-      messageBubble;
-  final String senderId;
-  final VoidCallback onLongPress;
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onLongPress: onLongPress,
-      child: messageBubble(
-        message: message,
-        isMe: message.senderId == senderId,
-      ),
     );
   }
 }
