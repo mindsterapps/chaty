@@ -240,21 +240,28 @@ class ChatService {
   }
 
   Stream<List<ChatSummary>> getUserChats(String userId) {
+    final possibleUserIds = [
+      userId,
+      userId.trim(),
+      int.tryParse(userId)?.toString() ?? userId,
+      '_$userId',
+      '${userId}_'
+    ].toSet().toList(); // Remove duplicates
     debugAllChats();
     return _firestore
         .collection('chats')
-        .where('users', arrayContainsAny: [userId])
+        .where('users', arrayContainsAny: possibleUserIds)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            final data = doc.data().log('snapshot');
+      return snapshot.docs.map((doc) {
+        final data = doc.data().log('snapshot');
 
-            return ChatSummary.fromMap(
-              data,
-              userId,
-            );
-          }).toList();
-        });
+        return ChatSummary.fromMap(
+          data,
+          userId,
+        );
+      }).toList();
+    });
   }
 
   Future<void> debugAllChats() async {
