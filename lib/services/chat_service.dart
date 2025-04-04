@@ -2,7 +2,6 @@ import 'package:chaty/models/chat_summary.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import '../models/message.dart';
 
 class ChatService {
@@ -41,14 +40,14 @@ class ChatService {
                     : "📎 File");
 
     // Update chat summary
-    await _firestore.collection('chats').doc(chatId).update({
+    await _firestore.collection('chats').doc(chatId).set({
       'lastMessage': lastMessageText,
       'lastMessageType': message.type.toString(),
       'lastMessageTime': FieldValue.serverTimestamp(),
       'lastMessageSender': message.senderId, // Store sender's ID
       'users': [message.senderId, message.receiverId],
       'unreadCount': FieldValue.increment(1), // ✅ Increase unread count
-    });
+    }, SetOptions(merge: true));
   }
 
   Future<void> updateLastSeen(String userId) async {
@@ -240,36 +239,19 @@ class ChatService {
   }
 
   Stream<List<ChatSummary>> getUserChats(String userId) {
-    final possibleUserIds = [
-      userId,
-      userId.trim(),
-      int.tryParse(userId)?.toString() ?? userId,
-      '_$userId',
-      '${userId}_'
-    ].toSet().toList(); // Remove duplicates
-    debugAllChats();
     return _firestore
         .collection('chats')
-        .where('users', arrayContainsAny: possibleUserIds)
+        .where('users', arrayContainsAny: [userId])
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data().log('snapshot');
+          return snapshot.docs.map((doc) {
+            final data = doc.data().log('snapshot');
 
-        return ChatSummary.fromMap(
-          data,
-          userId,
-        );
-      }).toList();
-    });
-  }
-
-  Future<void> debugAllChats() async {
-    final snapshot = await _firestore.collection('chats').get();
-    debugPrint('Total documents in collection: ${snapshot.docs.length}');
-    for (final doc in snapshot.docs) {
-      debugPrint(
-          'Doc ${doc.id} users: ${doc.data()['users']?.toString() ?? 'NULL'}');
-    }
+            return ChatSummary.fromMap(
+              data,
+              userId,
+            );
+          }).toList();
+        });
   }
 }
