@@ -1,10 +1,10 @@
-import 'dart:async';
-import 'package:chaty/ui/message_bubble.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
-import 'message_list.dart';
 import 'message_input.dart';
+
+import 'dart:async';
+import 'message_list.dart';
 
 class ChatScreen extends StatefulWidget {
   final String senderId;
@@ -20,6 +20,7 @@ class ChatScreen extends StatefulWidget {
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
   final Function(DateTime lastSeen)? getLastSeen;
   final Function()? onDeleteMessage;
+
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
@@ -27,9 +28,9 @@ class ChatScreen extends StatefulWidget {
     this.messageBubbleBuilder,
     this.mediaUploaderFunction,
     this.intialChatLimit,
-    Key? key,
     this.getLastSeen,
     this.onDeleteMessage,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -37,90 +38,8 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  final ChatService _chatService = ChatService.instance;
-  final ScrollController _scrollController = ScrollController();
-  List<Message> _messages = [];
-  final ValueNotifier<bool> _isLoadingMore = ValueNotifier(false);
-  Message? _lastMessage;
-  bool _hasMoreMessages = true;
-  late final String chatId;
-
-  @override
-  void initState() {
-    _chatService.initialLimit = widget.intialChatLimit ?? 15;
-    chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
-    super.initState();
-    _fetchInitialMessages();
-    _fetchlastseen();
-    _chatService.updateLastSeen(widget.senderId);
-    _scrollController.addListener(_onScroll);
-  }
-
-  @override
-  void didUpdateWidget(covariant ChatScreen oldWidget) {
-    _chatService.updateLastSeen(widget.senderId);
-    super.didUpdateWidget(oldWidget);
-  }
-
-  Future<void> _fetchlastseen() async {
-    final lastSeen = _chatService.getLastSeen(widget.receiverId);
-    lastSeen.listen((event) {
-      if (event != null) {
-        widget.getLastSeen?.call(event.toDate());
-      }
-    });
-  }
-
-  Future<void> _fetchInitialMessages() async {
-    _chatService.streamLatestMessages(chatId).listen((newMessages) {
-      if (mounted) {
-        setState(() {
-          if (_messages.isEmpty) {
-            _messages = List.from(newMessages);
-          } else {
-            for (var msg in newMessages) {
-              if (!_messages.any((m) => m.messageId == msg.messageId)) {
-                _messages.insert(0, msg);
-              }
-            }
-          }
-          if (_messages.isNotEmpty) {
-            _lastMessage = _messages.last;
-          }
-        });
-        _markMessagesAsRead();
-      }
-    });
-  }
-
-  void _markMessagesAsRead() {
-    _chatService.markMessagesAsRead(chatId, widget.senderId);
-  }
-
-  Future<void> _loadMoreMessages() async {
-    if (_isLoadingMore.value || !_hasMoreMessages || _lastMessage == null)
-      return;
-    _isLoadingMore.value = true;
-
-    List<Message> olderMessages = await _chatService.fetchMessages(
-      chatId,
-      lastMessage: _lastMessage,
-    );
-
-    if (olderMessages.isNotEmpty) {
-      setState(() {
-        _messages.addAll(olderMessages); // Append at the end
-        _lastMessage = olderMessages.last;
-      });
-    } else {
-      _hasMoreMessages = false;
-    }
-
-    _isLoadingMore.value = false;
-  }
-
-  void _sendMessage(String text) {
-    Message message = Message(
+  void _sendMessage(ChatService chatService, String text) {
+    final message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
       receiverId: widget.receiverId,
@@ -130,16 +49,16 @@ class _ChatScreenState extends State<ChatScreen> {
       timestamp: DateTime.now(),
       status: MessageStatus.unread,
     );
-
-    _chatService.sendMessage(message);
+    chatService.sendMessage(message);
   }
 
-  void _sendMediaMessage(String? mediaPath, MessageType type) async {
+  void _sendMediaMessage(
+      ChatService chatService, String? mediaPath, MessageType type) async {
     if (mediaPath == null) return;
     final path = await widget.mediaUploaderFunction?.call(mediaPath);
     if (path == null) return;
 
-    Message message = Message(
+    final message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
       receiverId: widget.receiverId,
@@ -149,48 +68,10 @@ class _ChatScreenState extends State<ChatScreen> {
       timestamp: DateTime.now(),
       status: MessageStatus.unread,
     );
-
-    _chatService.sendMessage(message);
+    chatService.sendMessage(message);
   }
 
-  void _onScroll() {
-    if (!_scrollController.hasClients) return;
-
-    double threshold =
-        MediaQuery.of(context).size.height * 0.2; // 20% of screen height
-    if (_scrollController.position.pixels <= threshold &&
-        !_isLoadingMore.value &&
-        _hasMoreMessages) {
-      _loadMoreMessages();
-    }
-  }
-
-  void _confirmDeleteMessage(String messageId) async {
-    bool confirmDelete = await showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text("Delete Message?"),
-        content: Text("Are you sure you want to delete this message?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text("Cancel")),
-          TextButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text("Delete")),
-        ],
-      ),
-    );
-
-    if (confirmDelete) {
-      _chatService.deleteMessage(chatId, messageId);
-
-      setState(() {
-        _messages.removeWhere((msg) => msg.messageId == messageId);
-      });
-      widget.onDeleteMessage?.call();
-    }
-  }
+  final chatService = ChatService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -198,33 +79,25 @@ class _ChatScreenState extends State<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: MessageList(
-              onDismiss: ({required index, required messageId}) {
-                _confirmDeleteMessage(messageId);
-              },
-              messageBubble: ({required isMe, required message}) =>
-                  widget.messageBubbleBuilder?.call(
-                    message: message,
-                    isMe: isMe,
-                  ) ??
-                  MessageBubble(
-                    isMe: isMe,
-                    message: message,
-                  ),
-              messages: _messages,
+            child: ChatMessageList(
               senderId: widget.senderId,
-              scrollController: _scrollController,
-              isLoadingMore: _isLoadingMore.value,
+              receiverId: widget.receiverId,
+              initialChatLimit: widget.intialChatLimit ?? 15,
+              getLastSeen: widget.getLastSeen,
+              onDeleteMessage: widget.onDeleteMessage,
+              messageBubbleBuilder: widget.messageBubbleBuilder,
             ),
           ),
           widget.sendMessageBuilder?.call(
                 context,
-                sendMessage: _sendMessage,
-                sendMediaMessage: _sendMediaMessage,
+                sendMessage: (txt) => _sendMessage(chatService, txt),
+                sendMediaMessage: (path, type) =>
+                    _sendMediaMessage(chatService, path, type),
               ) ??
               MessageInput(
-                onSendMessage: _sendMessage,
-                onSendAudioMessage: _sendMediaMessage,
+                onSendMessage: (txt) => _sendMessage(chatService, txt),
+                onSendAudioMessage: (path, type) =>
+                    _sendMediaMessage(chatService, path, type),
               ),
         ],
       ),
