@@ -58,7 +58,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
         for (var msg in newMessages) {
           if (!_messages.value.any((m) => m.messageId == msg.messageId)) {
             _messages.value.insert(0, msg);
-            _messages.notifyListeners();
           }
         }
         if (_messages.value.isNotEmpty) {
@@ -91,7 +90,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
       setState(() {
         _messages.value.addAll(olderMessages);
         _lastMessage = olderMessages.last;
-        _messages.notifyListeners();
       });
     } else {
       _hasMoreMessages = false;
