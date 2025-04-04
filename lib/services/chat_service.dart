@@ -2,6 +2,7 @@ import 'package:chaty/models/chat_summary.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import '../models/message.dart';
 
 class ChatService {
@@ -241,17 +242,15 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContainsAny : [userId])
+        .where('users', arrayContains: userId) // Changed to arrayContains
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            final data = doc.data().log('snapshot');
-
-            return ChatSummary.fromMap(
-              data,
-              userId,
-            );
-          }).toList();
-        });
+      return snapshot.docs.map((doc) {
+        final data = doc.data();
+        debugPrint(
+            'Chat document: ${doc.id} - ${data.toString()}'); // Added debug
+        return ChatSummary.fromMap(data, userId);
+      }).toList();
+    });
   }
 }
