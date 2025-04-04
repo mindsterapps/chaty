@@ -2,7 +2,6 @@ import 'package:chaty/models/chat_summary.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import '../models/message.dart';
 
 class ChatService {
@@ -242,29 +241,17 @@ class ChatService {
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')
-        .where('users', arrayContains: userId)
+        .where('users', arrayContainsAny : [userId])
         .snapshots()
-        .handleError(
-            (error) => debugPrint('Firestore Error: $error')) // Error handling
         .map((snapshot) {
-      debugPrint('Total docs received: ${snapshot.docs.length}'); // Debug count
-      return snapshot.docs
-          .map((doc) {
-            debugPrint('Processing doc ${doc.id} with data: ${doc.data()}');
-            if (!doc.data().containsKey('users')) {
-              debugPrint('Document ${doc.id} missing users field!');
-              return null;
-            }
+          return snapshot.docs.map((doc) {
+            final data = doc.data().log('snapshot');
 
-            try {
-              return ChatSummary.fromMap(doc.data(), userId);
-            } catch (e) {
-              debugPrint('Error parsing doc ${doc.id}: $e');
-              return null;
-            }
-          })
-          .where((item) => item != null)
-          .toList() as List<ChatSummary>;
-    });
+            return ChatSummary.fromMap(
+              data,
+              userId,
+            );
+          }).toList();
+        });
   }
 }
