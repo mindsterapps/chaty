@@ -152,18 +152,16 @@ class _ChatMessageListState extends State<ChatMessageList> {
         itemCount: _messages.length,
         itemBuilder: (context, index) {
           final message = _messages[index];
-          return KeyedSubtree(
+          return GestureDetector(
             key: ValueKey(message.messageId),
-            child: GestureDetector(
-              onLongPress: () => _confirmDeleteMessage(message.messageId),
-              child: widget.messageBubbleBuilder?.call(
-                    message: message,
+            onLongPress: () => _confirmDeleteMessage(message.messageId),
+            child: widget.messageBubbleBuilder?.call(
+                  message: message,
+                  isMe: message.senderId == widget.senderId,
+                ) ??
+                MessageBubble(
                     isMe: message.senderId == widget.senderId,
-                  ) ??
-                  MessageBubble(
-                      isMe: message.senderId == widget.senderId,
-                      message: message),
-            ),
+                    message: message),
           );
         },
       ),
