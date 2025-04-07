@@ -127,7 +127,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
       _lastMessage = _messages[_messages.length - 2];
     await _chatService.deleteMessage(chatId, message.messageId);
     widget.onDeleteMessage?.call();
-    setState(() {});
+    setState(() {
+      _messages.removeWhere((msg) => msg.messageId == message.messageId);
+    });
   }
 
   @override
