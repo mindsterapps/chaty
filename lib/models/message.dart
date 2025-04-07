@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum MessageStatus {
   delivered,
   unread,
@@ -42,7 +44,7 @@ class Message {
       'receiverId': receiverId,
       'text': text,
       'mediaUrl': mediaUrl,
-      'timestamp': timestamp.toIso8601String(),
+      'timestamp': FieldValue.serverTimestamp(),
       'status': status.toString().split('.').last,
       'type': type.toString().split('.').last,
     };
@@ -56,7 +58,7 @@ class Message {
       receiverId: map['receiverId'],
       text: map['text'],
       mediaUrl: map['mediaUrl'],
-      timestamp: DateTime.parse(map['timestamp']),
+      timestamp: (map['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: MessageStatus.values.firstWhere(
         (e) => e.toString().split('.').last == map['status'],
         orElse: () => MessageStatus.unread,
