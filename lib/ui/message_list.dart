@@ -182,7 +182,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final isMe = message.senderId == widget.senderId;
                 ValueNotifier<bool> swipe = ValueNotifier(false);
                 return GestureDetector(
-                  onHorizontalDragEnd: (details) {},
+                  onHorizontalDragEnd: (details) {
+                    swipe.value = !swipe.value;
+                  },
                   onLongPress: () {
                     if (selectedController.isSelected(message.messageId)) {
                       selectedController.remove(message.messageId);
