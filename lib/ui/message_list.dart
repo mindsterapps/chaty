@@ -185,9 +185,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
                               width: 2,
                               color: selectedController
                                       .isSelected(message.messageId)
-                                  ? Colors.blue
+                                  ? Colors.blue.withAlpha(20)
                                   : Colors.transparent,
                             ),
+                            color:
+                                selectedController.isSelected(message.messageId)
+                                    ? Colors.blue.withAlpha(50)
+                                    : Colors.transparent,
                           ),
                           child: widget.messageBubbleBuilder?.call(
                                 message: message,
