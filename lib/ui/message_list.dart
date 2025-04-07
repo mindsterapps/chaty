@@ -168,24 +168,25 @@ class _ChatMessageListState extends State<ChatMessageList> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                return GestureDetector(
-                  onLongPress: () {
-                    if (selectedController.isSelected(message.messageId)) {
-                      selectedController.remove(message.messageId);
-                    } else {
-                      selectedController.add(message.messageId);
-                    }
-                  },
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
+                return Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    GestureDetector(
+                      onLongPress: () {
+                        if (selectedController.isSelected(message.messageId)) {
+                          selectedController.remove(message.messageId);
+                        } else {
+                          selectedController.add(message.messageId);
+                        }
+                      },
+                      child: Container(
                           decoration: BoxDecoration(
                             border: Border.all(),
                             color:
                                 selectedController.isSelected(message.messageId)
                                     ? Colors.blue
                                     : Colors.transparent,
+                            borderRadius: BorderRadius.circular(8),
                           ),
                           child: widget.messageBubbleBuilder?.call(
                                 message: message,
@@ -194,8 +195,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
                               MessageBubble(
                                   isMe: message.senderId == widget.senderId,
                                   message: message)),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             );
