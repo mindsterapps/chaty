@@ -213,34 +213,27 @@ class _ChatMessageListState extends State<ChatMessageList> {
                             ? Colors.blue.withAlpha(50)
                             : Colors.transparent,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          widget.messageBubbleBuilder?.call(
-                                message: message,
-                                isMe: isMe,
-                              ) ??
-                              MessageBubble(isMe: isMe, message: message),
-                          ValueListenableBuilder(
-                              valueListenable: swipe,
-                              builder: (context, _, __) {
-                                return AnimatedSwitcher(
-                                  duration: Duration(milliseconds: 300),
-                                  child: swipe.value
-                                      ? Container(
-                                          key:
-                                              ValueKey('${message.messageId}1'),
-                                          width: 50,
-                                          height: 50,
-                                          color: Colors.blue,
-                                          child:
-                                              Center(child: Icon(Icons.delete)),
-                                        )
-                                      : null,
-                                );
-                              }),
-                        ],
-                      )),
+                      child: ValueListenableBuilder(
+                          valueListenable: swipe,
+                          builder: (context, _, __) {
+                            return AnimatedSwitcher(
+                              duration: Duration(milliseconds: 300),
+                              child: swipe.value
+                                  ? Container(
+                                      key: ValueKey('${message.messageId}1'),
+                                      width: 50,
+                                      height: 50,
+                                      color: Colors.blue,
+                                      child: Center(child: Icon(Icons.delete)),
+                                    )
+                                  : widget.messageBubbleBuilder?.call(
+                                        message: message,
+                                        isMe: isMe,
+                                      ) ??
+                                      MessageBubble(
+                                          isMe: isMe, message: message),
+                            );
+                          })),
                 );
               },
             );
