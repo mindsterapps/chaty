@@ -222,11 +222,35 @@ class _ChatMessageListState extends State<ChatMessageList> {
                               duration: Duration(milliseconds: 300),
                               child: swipe.value
                                   ? Container(
-                                      key: ValueKey('${message.messageId}1'),
-                                      width: 50,
-                                      height: 50,
-                                      color: Colors.blue,
-                                      child: Center(child: Icon(Icons.delete)),
+                                      key: ValueKey(2),
+                                      width: 300,
+                                      height: 100,
+                                      color: Colors.white,
+                                      padding:
+                                          EdgeInsets.symmetric(horizontal: 16),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              "Are you sure you want to delete?",
+                                              style: TextStyle(fontSize: 16),
+                                            ),
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.cancel,
+                                                color: Colors.grey),
+                                            onPressed: () {},
+                                          ),
+                                          IconButton(
+                                            icon: Icon(Icons.delete,
+                                                color: Colors.red),
+                                            onPressed: () {
+                                              if (isMe)
+                                                _confirmDeleteMessage(message);
+                                            },
+                                          ),
+                                        ],
+                                      ),
                                     )
                                   : widget.messageBubbleBuilder?.call(
                                         message: message,
