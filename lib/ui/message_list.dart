@@ -168,40 +168,34 @@ class _ChatMessageListState extends State<ChatMessageList> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                return Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    GestureDetector(
-                      onLongPress: () {
-                        if (selectedController.isSelected(message.messageId)) {
-                          selectedController.remove(message.messageId);
-                        } else {
-                          selectedController.add(message.messageId);
-                        }
-                      },
-                      child: Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              width: 2,
-                              color: selectedController
-                                      .isSelected(message.messageId)
+                return GestureDetector(
+                  onLongPress: () {
+                    if (selectedController.isSelected(message.messageId)) {
+                      selectedController.remove(message.messageId);
+                    } else {
+                      selectedController.add(message.messageId);
+                    }
+                  },
+                  child: Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          width: 2,
+                          color:
+                              selectedController.isSelected(message.messageId)
                                   ? Colors.blue.withAlpha(20)
                                   : Colors.transparent,
-                            ),
-                            color:
-                                selectedController.isSelected(message.messageId)
-                                    ? Colors.blue.withAlpha(50)
-                                    : Colors.transparent,
-                          ),
-                          child: widget.messageBubbleBuilder?.call(
-                                message: message,
-                                isMe: message.senderId == widget.senderId,
-                              ) ??
-                              MessageBubble(
-                                  isMe: message.senderId == widget.senderId,
-                                  message: message)),
-                    ),
-                  ],
+                        ),
+                        color: selectedController.isSelected(message.messageId)
+                            ? Colors.blue.withAlpha(50)
+                            : Colors.transparent,
+                      ),
+                      child: widget.messageBubbleBuilder?.call(
+                            message: message,
+                            isMe: message.senderId == widget.senderId,
+                          ) ??
+                          MessageBubble(
+                              isMe: message.senderId == widget.senderId,
+                              message: message)),
                 );
               },
             );
