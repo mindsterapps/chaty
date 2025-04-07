@@ -170,8 +170,10 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final message = _messages[index];
                 return GestureDetector(
                   onLongPress: () {
-                    if (message.senderId == widget.senderId) {
-                      _confirmDeleteMessage(message.messageId);
+                    if (selectedController.isSelected(message.messageId)) {
+                      selectedController.remove(message.messageId);
+                    } else {
+                      selectedController.add(message.messageId);
                     }
                   },
                   child: Container(
@@ -205,10 +207,12 @@ class SelectedController extends ValueNotifier<List> {
 
   void selectAll(List items) {
     value = items;
+    notifyListeners();
   }
 
   void clearSelection() {
     value = [];
+    notifyListeners();
   }
 
   bool isSelected(String id) {
@@ -221,21 +225,26 @@ class SelectedController extends ValueNotifier<List> {
     } else {
       value.add(id);
     }
+    notifyListeners();
   }
 
   void remove(String id) {
     value.remove(id);
+    notifyListeners();
   }
 
   void add(String id) {
     value.add(id);
+    notifyListeners();
   }
 
   void removeAll() {
     value = [];
+    notifyListeners();
   }
 
   void addAll(List ids) {
     value.addAll(ids);
+    notifyListeners();
   }
 }
