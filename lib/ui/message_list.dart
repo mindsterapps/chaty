@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/message_bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:swipe_to/swipe_to.dart';
 import '../models/message.dart';
 
 class ChatMessageList extends StatefulWidget {
@@ -13,6 +15,7 @@ class ChatMessageList extends StatefulWidget {
   final Function()? onDeleteMessage;
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
+  final void Function({required List<Message> messages})? onMessageSelected;
 
   const ChatMessageList({
     required this.senderId,
@@ -22,6 +25,7 @@ class ChatMessageList extends StatefulWidget {
     this.onDeleteMessage,
     this.messageBubbleBuilder,
     Key? key,
+    this.onMessageSelected,
   }) : super(key: key);
 
   @override
@@ -47,6 +51,14 @@ class _ChatMessageListState extends State<ChatMessageList> {
     _fetchLastSeen();
     _scrollController.addListener(_onScroll);
     _listenToMessages();
+    selectedController.addListener(() {
+      widget.onMessageSelected?.call(
+        messages: _messages
+            .where(
+                (message) => selectedController.isSelected(message.messageId))
+            .toList(),
+      );
+    });
     super.initState();
   }
 
@@ -109,7 +121,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
     }
   }
 
-  void _confirmDeleteMessage(String messageId) async {
+  void _confirmDeleteMessage(Message message) async {
     bool confirm = await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -127,9 +139,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
     );
 
     if (confirm) {
-      await _chatService.deleteMessage(chatId, messageId);
+      await _chatService.deleteMessage(chatId, message.messageId);
       setState(() {
-        _messages.removeWhere((msg) => msg.messageId == messageId);
+        _messages.removeWhere((msg) => msg.messageId == message.messageId);
       });
       widget.onDeleteMessage?.call();
     }
@@ -168,34 +180,49 @@ class _ChatMessageListState extends State<ChatMessageList> {
               itemCount: _messages.length,
               itemBuilder: (context, index) {
                 final message = _messages[index];
-                return GestureDetector(
-                  onLongPress: () {
-                    if (selectedController.isSelected(message.messageId)) {
-                      selectedController.remove(message.messageId);
-                    } else {
-                      selectedController.add(message.messageId);
-                    }
+                final isMe = message.senderId == widget.senderId;
+                return SwipeTo(
+                  onRightSwipe: (details) {
+                    if (isMe) _confirmDeleteMessage(message);
                   },
-                  child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2,
+                  child: GestureDetector(
+                    onLongPress: () {
+                      if (selectedController.isSelected(message.messageId)) {
+                        selectedController.remove(message.messageId);
+                      } else {
+                        selectedController.add(message.messageId);
+                      }
+                    },
+                    onTap: () {
+                      if (selectedController.value.isEmpty) {
+                        return;
+                      }
+                      if (selectedController.isSelected(message.messageId)) {
+                        selectedController.remove(message.messageId);
+                      } else {
+                        selectedController.add(message.messageId);
+                      }
+                    },
+                    child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 2,
+                            color:
+                                selectedController.isSelected(message.messageId)
+                                    ? Colors.blue.withAlpha(20)
+                                    : Colors.transparent,
+                          ),
                           color:
                               selectedController.isSelected(message.messageId)
-                                  ? Colors.blue.withAlpha(20)
+                                  ? Colors.blue.withAlpha(50)
                                   : Colors.transparent,
                         ),
-                        color: selectedController.isSelected(message.messageId)
-                            ? Colors.blue.withAlpha(50)
-                            : Colors.transparent,
-                      ),
-                      child: widget.messageBubbleBuilder?.call(
-                            message: message,
-                            isMe: message.senderId == widget.senderId,
-                          ) ??
-                          MessageBubble(
-                              isMe: message.senderId == widget.senderId,
-                              message: message)),
+                        child: widget.messageBubbleBuilder?.call(
+                              message: message,
+                              isMe: isMe,
+                            ) ??
+                            MessageBubble(isMe: isMe, message: message)),
+                  ),
                 );
               },
             );

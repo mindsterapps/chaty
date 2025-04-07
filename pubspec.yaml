@@ -17,6 +17,7 @@ dependencies:
   permission_handler:
   path_provider:
   firebase_core:
+  swipe_to:
 
 dev_dependencies:
   flutter_test:
