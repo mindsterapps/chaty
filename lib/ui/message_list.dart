@@ -98,6 +98,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
       chatId,
       lastMessage: _lastMessage,
     );
+    double beforeOffset = _scrollController.offset;
+    double beforeMax = _scrollController.position.maxScrollExtent;
 
     if (olderMessages.isNotEmpty) {
       setState(() {
@@ -108,6 +110,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
       _hasMoreMessages = false;
     }
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      double afterMax = _scrollController.position.maxScrollExtent;
+      double delta = afterMax - beforeMax;
+
+      _scrollController.jumpTo(beforeOffset + delta);
+    });
+
     _isLoadingMore.value = false;
   }
 
@@ -115,6 +124,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
     if (!_scrollController.hasClients) return;
 
     double threshold = MediaQuery.of(context).size.height * 0.2;
+
     if (_scrollController.position.pixels <= threshold &&
         !_isLoadingMore.value &&
         _hasMoreMessages) {
