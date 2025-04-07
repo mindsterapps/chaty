@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/message_bubble.dart';
+import 'package:chaty/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
@@ -64,8 +65,10 @@ class _ChatMessageListState extends State<ChatMessageList> {
     _messageSub =
         _chatService.streamLatestMessages(chatId).listen((newMessages) {
       if (!mounted) return;
+
       setState(() {
-        for (var msg in newMessages.reversed) {
+        for (var msg
+            in newMessages.unique((message) => message.messageId).reversed) {
           if (!_messages.any((m) => m.messageId == msg.messageId)) {
             _messages.insert(0, msg);
           }
