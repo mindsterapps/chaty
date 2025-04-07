@@ -96,7 +96,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
     List<Message> olderMessages = await _chatService.fetchMessages(
       chatId,
-      lastMessage: _lastMessage,
+      lastMessage: _messages.first,
     );
     double beforeOffset = _scrollController.offset;
     double beforeMax = _scrollController.position.maxScrollExtent;
