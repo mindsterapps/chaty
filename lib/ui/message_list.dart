@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/message_bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:swipe_to/swipe_to.dart';
 import '../models/message.dart';
 
 class ChatMessageList extends StatefulWidget {
@@ -121,29 +120,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
   }
 
   void _confirmDeleteMessage(Message message) async {
-    bool confirm = await showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text("Delete Message"),
-        content: const Text("Are you sure you want to delete this message?"),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text("Cancel")),
-          TextButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text("Delete")),
-        ],
-      ),
-    );
-
-    if (confirm) {
-      await _chatService.deleteMessage(chatId, message.messageId);
-      setState(() {
-        _messages.removeWhere((msg) => msg.messageId == message.messageId);
-      });
-      widget.onDeleteMessage?.call();
-    }
+    if (_messages.length > 1) _lastMessage = _messages[_messages.length - 2];
+    await _chatService.deleteMessage(chatId, message.messageId);
+    setState(() {
+      _messages.removeWhere((msg) => msg.messageId == message.messageId);
+    });
+    widget.onDeleteMessage?.call();
   }
 
   @override
@@ -183,7 +165,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 ValueNotifier<bool> swipe = ValueNotifier(false);
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
-                    swipe.value = !swipe.value;
+                    if (isMe) swipe.value = !swipe.value;
                   },
                   onLongPress: () {
                     if (selectedController.isSelected(message.messageId)) {
@@ -239,7 +221,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
                                           IconButton(
                                             icon: Icon(Icons.cancel,
                                                 color: Colors.grey),
-                                            onPressed: () {},
+                                            onPressed: () {
+                                              swipe.value = !swipe.value;
+                                            },
                                           ),
                                           IconButton(
                                             icon: Icon(Icons.delete,
