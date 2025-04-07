@@ -181,6 +181,10 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final message = _messages[index];
                 final isMe = message.senderId == widget.senderId;
                 return SwipeTo(
+                  rightSwipeWidget: Container(
+                    color: Colors.red,
+                    child: const Icon(Icons.delete, color: Colors.white),
+                  ),
                   onRightSwipe: (details) {
                     if (isMe) _confirmDeleteMessage(message);
                   },
