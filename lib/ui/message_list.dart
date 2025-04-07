@@ -181,6 +181,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final message = _messages[index];
                 final isMe = message.senderId == widget.senderId;
                 return SwipeTo(
+                  offsetDx: 0.2,
                   rightSwipeWidget: Icon(Icons.delete),
                   onRightSwipe: (details) {
                     if (isMe) _confirmDeleteMessage(message);
