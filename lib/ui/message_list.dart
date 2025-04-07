@@ -168,99 +168,104 @@ class _ChatMessageListState extends State<ChatMessageList> {
       child: ValueListenableBuilder(
           valueListenable: selectedController,
           builder: (context, value, child) {
-            return ListView.builder(
-              cacheExtent: 10000,
-              controller: _scrollController,
-              reverse: true,
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isMe = message.senderId == widget.senderId;
-                ValueNotifier<bool> swipe = ValueNotifier(false);
-                if (message.isDeleted) return Container();
-                return GestureDetector(
-                  onHorizontalDragEnd: (details) {
-                    if (isMe) swipe.value = !swipe.value;
-                  },
-                  onLongPress: () {
-                    if (selectedController.isSelected(message.messageId)) {
-                      selectedController.remove(message.messageId);
-                    } else {
-                      selectedController.add(message.messageId);
-                    }
-                  },
-                  onTap: () {
-                    if (selectedController.value.isEmpty) {
-                      return;
-                    }
-                    if (selectedController.isSelected(message.messageId)) {
-                      selectedController.remove(message.messageId);
-                    } else {
-                      selectedController.add(message.messageId);
-                    }
-                  },
-                  child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2,
+            return RefreshIndicator(
+              onRefresh: _loadMoreMessages,
+              child: ListView.builder(
+                cacheExtent: 10000,
+                controller: _scrollController,
+                reverse: true,
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  final isMe = message.senderId == widget.senderId;
+                  ValueNotifier<bool> swipe = ValueNotifier(false);
+                  if (message.isDeleted) return Container();
+                  return GestureDetector(
+                    onHorizontalDragEnd: (details) {
+                      if (isMe) swipe.value = !swipe.value;
+                    },
+                    onLongPress: () {
+                      if (selectedController.isSelected(message.messageId)) {
+                        selectedController.remove(message.messageId);
+                      } else {
+                        selectedController.add(message.messageId);
+                      }
+                    },
+                    onTap: () {
+                      if (selectedController.value.isEmpty) {
+                        return;
+                      }
+                      if (selectedController.isSelected(message.messageId)) {
+                        selectedController.remove(message.messageId);
+                      } else {
+                        selectedController.add(message.messageId);
+                      }
+                    },
+                    child: Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            width: 2,
+                            color:
+                                selectedController.isSelected(message.messageId)
+                                    ? Colors.blue.withAlpha(20)
+                                    : Colors.transparent,
+                          ),
                           color:
                               selectedController.isSelected(message.messageId)
-                                  ? Colors.blue.withAlpha(20)
+                                  ? Colors.blue.withAlpha(50)
                                   : Colors.transparent,
                         ),
-                        color: selectedController.isSelected(message.messageId)
-                            ? Colors.blue.withAlpha(50)
-                            : Colors.transparent,
-                      ),
-                      child: ValueListenableBuilder(
-                          valueListenable: swipe,
-                          builder: (context, _, __) {
-                            return AnimatedSwitcher(
-                              duration: Duration(milliseconds: 300),
-                              child: swipe.value
-                                  ? Container(
-                                      key: ValueKey(2),
-                                      width: 300,
-                                      height: 100,
-                                      color: Colors.white,
-                                      padding:
-                                          EdgeInsets.symmetric(horizontal: 16),
-                                      child: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Text(
-                                              "Are you sure you want to delete?",
-                                              style: TextStyle(fontSize: 16),
+                        child: ValueListenableBuilder(
+                            valueListenable: swipe,
+                            builder: (context, _, __) {
+                              return AnimatedSwitcher(
+                                duration: Duration(milliseconds: 300),
+                                child: swipe.value
+                                    ? Container(
+                                        key: ValueKey(2),
+                                        width: 300,
+                                        height: 100,
+                                        color: Colors.white,
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16),
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Text(
+                                                "Are you sure you want to delete?",
+                                                style: TextStyle(fontSize: 16),
+                                              ),
                                             ),
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.cancel,
-                                                color: Colors.grey),
-                                            onPressed: () {
-                                              swipe.value = !swipe.value;
-                                            },
-                                          ),
-                                          IconButton(
-                                            icon: Icon(Icons.delete,
-                                                color: Colors.red),
-                                            onPressed: () {
-                                              if (isMe)
-                                                _confirmDeleteMessage(message);
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : widget.messageBubbleBuilder?.call(
-                                        message: message,
-                                        isMe: isMe,
-                                      ) ??
-                                      MessageBubble(
-                                          isMe: isMe, message: message),
-                            );
-                          })),
-                );
-              },
+                                            IconButton(
+                                              icon: Icon(Icons.cancel,
+                                                  color: Colors.grey),
+                                              onPressed: () {
+                                                swipe.value = !swipe.value;
+                                              },
+                                            ),
+                                            IconButton(
+                                              icon: Icon(Icons.delete,
+                                                  color: Colors.red),
+                                              onPressed: () {
+                                                if (isMe)
+                                                  _confirmDeleteMessage(
+                                                      message);
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : widget.messageBubbleBuilder?.call(
+                                          message: message,
+                                          isMe: isMe,
+                                        ) ??
+                                        MessageBubble(
+                                            isMe: isMe, message: message),
+                              );
+                            })),
+                  );
+                },
+              ),
             );
           }),
     );
