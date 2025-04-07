@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ffi';
 
 import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/message_bubble.dart';

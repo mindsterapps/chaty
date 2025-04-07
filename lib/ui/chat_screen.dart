@@ -21,6 +21,8 @@ class ChatScreen extends StatefulWidget {
   final Function(DateTime lastSeen)? getLastSeen;
   final Function()? onDeleteMessage;
 
+  final void Function({required List<Message> messages})? onMessageSelected;
+
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
@@ -31,6 +33,7 @@ class ChatScreen extends StatefulWidget {
     this.getLastSeen,
     this.onDeleteMessage,
     Key? key,
+    this.onMessageSelected,
   }) : super(key: key);
 
   @override
@@ -80,6 +83,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ChatMessageList(
+              onMessageSelected: widget.onMessageSelected,
               senderId: widget.senderId,
               receiverId: widget.receiverId,
               initialChatLimit: widget.intialChatLimit ?? 15,
