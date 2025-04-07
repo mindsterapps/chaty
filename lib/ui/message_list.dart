@@ -123,11 +123,12 @@ class _ChatMessageListState extends State<ChatMessageList> {
   }
 
   void _confirmDeleteMessage(Message message) async {
-    if (_messages.length > 1) _lastMessage = _messages[_messages.length - 2];
+    if (_messages.length > 1 && message.messageId == _messages.last.messageId)
+      _lastMessage = _messages[_messages.length - 2];
     await _chatService.deleteMessage(chatId, message.messageId);
-    setState(() {
-      _messages.removeWhere((msg) => msg.messageId == message.messageId);
-    });
+    // setState(() {
+    //   _messages.removeWhere((msg) => msg.messageId == message.messageId);
+    // });
     widget.onDeleteMessage?.call();
   }
 
