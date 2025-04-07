@@ -24,7 +24,7 @@ class Message {
   final DateTime timestamp;
   final MessageStatus status; // Added status field
   final MessageType type; // Added type field
-
+  final isDeleted;
   Message({
     required this.messageId,
     required this.senderId,
@@ -34,6 +34,7 @@ class Message {
     required this.timestamp,
     required this.status,
     required this.type,
+    this.isDeleted = false,
   });
 
   // Convert Message to a Map for Firestore storage
@@ -47,6 +48,7 @@ class Message {
       'timestamp': FieldValue.serverTimestamp(),
       'status': status.toString().split('.').last,
       'type': type.toString().split('.').last,
+      'isDeleted': isDeleted,
     };
   }
 
@@ -67,6 +69,7 @@ class Message {
         (e) => e.toString().split('.').last == map['type'],
         orElse: () => MessageType.text,
       ),
+      isDeleted: map['isDeleted'] ?? false,
     );
   }
 }

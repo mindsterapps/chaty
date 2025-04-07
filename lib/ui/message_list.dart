@@ -126,9 +126,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
     if (_messages.length > 1 && message.messageId == _messages.last.messageId)
       _lastMessage = _messages[_messages.length - 2];
     await _chatService.deleteMessage(chatId, message.messageId);
-    // setState(() {
-    //   _messages.removeWhere((msg) => msg.messageId == message.messageId);
-    // });
     widget.onDeleteMessage?.call();
   }
 
@@ -167,6 +164,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 final message = _messages[index];
                 final isMe = message.senderId == widget.senderId;
                 ValueNotifier<bool> swipe = ValueNotifier(false);
+                if (message.isDeleted) return Container();
                 return GestureDetector(
                   onHorizontalDragEnd: (details) {
                     if (isMe) swipe.value = !swipe.value;

@@ -190,7 +190,10 @@ class ChatService {
         }
 
         // Delete the message from Firestore
-        await messageRef.delete();
+        await messageRef.update({
+          'isDeleted': true,
+        });
+        ;
       }
     } catch (e) {
       print('Error deleting message: $e');
