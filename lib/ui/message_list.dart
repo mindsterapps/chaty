@@ -176,24 +176,26 @@ class _ChatMessageListState extends State<ChatMessageList> {
                       selectedController.add(message.messageId);
                     }
                   },
-                  child: Container(
-                      decoration: BoxDecoration(
-                          border: Border(
-                        bottom: BorderSide(
-                          color:
-                              selectedController.isSelected(message.messageId)
-                                  ? Colors.blue
-                                  : Colors.transparent,
-                          width: 2,
-                        ),
-                      )),
-                      child: widget.messageBubbleBuilder?.call(
-                            message: message,
-                            isMe: message.senderId == widget.senderId,
-                          ) ??
-                          MessageBubble(
-                              isMe: message.senderId == widget.senderId,
-                              message: message)),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(),
+                            color:
+                                selectedController.isSelected(message.messageId)
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                          ),
+                          child: widget.messageBubbleBuilder?.call(
+                                message: message,
+                                isMe: message.senderId == widget.senderId,
+                              ) ??
+                              MessageBubble(
+                                  isMe: message.senderId == widget.senderId,
+                                  message: message)),
+                    ],
+                  ),
                 );
               },
             );
