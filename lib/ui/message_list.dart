@@ -142,30 +142,100 @@ class _ChatMessageListState extends State<ChatMessageList> {
     super.dispose();
   }
 
+  SelectedController selectedController = SelectedController();
+  void selectAllMessages() {
+    selectedController.selectAll(_messages);
+  }
+
+  void clearSelection() {
+    selectedController.clearSelection();
+  }
+
+  void toggleSelection(String messageId) {
+    selectedController.toggleSelection(messageId);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Expanded(
-      child: ListView.builder(
-        cacheExtent: 10000,
-        controller: _scrollController,
-        reverse: true,
-        itemCount: _messages.length,
-        itemBuilder: (context, index) {
-          final message = _messages[index];
-          return GestureDetector(
-            onLongPress: () => message.senderId == widget.senderId
-                ? _confirmDeleteMessage(message.messageId)
-                : null,
-            child: widget.messageBubbleBuilder?.call(
-                  message: message,
-                  isMe: message.senderId == widget.senderId,
-                ) ??
-                MessageBubble(
-                    isMe: message.senderId == widget.senderId,
-                    message: message),
-          );
-        },
-      ),
+      child: ValueListenableBuilder(
+          valueListenable: selectedController,
+          builder: (context, value, child) {
+            return ListView.builder(
+              cacheExtent: 10000,
+              controller: _scrollController,
+              reverse: true,
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return GestureDetector(
+                  onLongPress: () {
+                    if (message.senderId == widget.senderId) {
+                      _confirmDeleteMessage(message.messageId);
+                    }
+                  },
+                  child: Container(
+                      decoration: BoxDecoration(
+                          border: Border(
+                        bottom: BorderSide(
+                          color:
+                              selectedController.isSelected(message.messageId)
+                                  ? Colors.blue
+                                  : Colors.transparent,
+                          width: 2,
+                        ),
+                      )),
+                      child: widget.messageBubbleBuilder?.call(
+                            message: message,
+                            isMe: message.senderId == widget.senderId,
+                          ) ??
+                          MessageBubble(
+                              isMe: message.senderId == widget.senderId,
+                              message: message)),
+                );
+              },
+            );
+          }),
     );
+  }
+}
+
+class SelectedController extends ValueNotifier<List> {
+  SelectedController() : super([]);
+
+  void selectAll(List items) {
+    value = items;
+  }
+
+  void clearSelection() {
+    value = [];
+  }
+
+  bool isSelected(String id) {
+    return value.contains(id);
+  }
+
+  void toggleSelection(String id) {
+    if (value.contains(id)) {
+      value.remove(id);
+    } else {
+      value.add(id);
+    }
+  }
+
+  void remove(String id) {
+    value.remove(id);
+  }
+
+  void add(String id) {
+    value.add(id);
+  }
+
+  void removeAll() {
+    value = [];
+  }
+
+  void addAll(List ids) {
+    value.addAll(ids);
   }
 }
