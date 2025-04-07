@@ -90,13 +90,15 @@ class _ChatMessageListState extends State<ChatMessageList> {
   }
 
   Future<void> _loadMoreMessages() async {
-    if (_isLoadingMore.value || !_hasMoreMessages || _lastMessage == null)
+    if (_isLoadingMore.value || !_hasMoreMessages || _lastMessage == null) {
+      ''.log('Already loading or no more messages');
       return;
+    }
     _isLoadingMore.value = true;
 
     List<Message> olderMessages = await _chatService.fetchMessages(
       chatId,
-      lastMessage: _messages.first,
+      lastMessage: _messages.first.log('first msg'),
     );
     double beforeOffset = _scrollController.offset;
     double beforeMax = _scrollController.position.maxScrollExtent;
@@ -107,6 +109,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
         _lastMessage = olderMessages.last;
       });
     } else {
+      ''.log('No more messages');
       _hasMoreMessages = false;
     }
 
