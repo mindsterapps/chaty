@@ -164,7 +164,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
           child: ValueListenableBuilder(
               valueListenable: selectedController,
               builder: (context, value, child) {
-                return RefreshIndicator.noSpinner(
+                return RefreshIndicator(
                   onRefresh: () => _loadMoreMessages(),
                   child: ListView.builder(
                     cacheExtent: 10000,

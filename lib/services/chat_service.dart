@@ -188,12 +188,19 @@ class ChatService {
         if (message.mediaUrl != null && message.mediaUrl!.isNotEmpty) {
           await _storageService.deleteMedia(message.mediaUrl!);
         }
-
+        _firestore.collection('chats').doc(chatId).set({
+          'lastMessage': 'deleted',
+          'lastMessageType': MessageType.text.toString(),
+          'lastMessageTime': FieldValue.serverTimestamp(),
+          'lastMessageSender': message.senderId, // Store sender's ID
+          'users': [message.senderId, message.receiverId],
+          'unreadCount': FieldValue.increment(1), // ✅ Increase unread count
+        }, SetOptions(merge: true));
         // Delete the message from Firestore
         await messageRef.update({
           'isDeleted': true,
         });
-        ;
+        // Update chat summary
       }
     } catch (e) {
       print('Error deleting message: $e');
