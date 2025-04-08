@@ -67,14 +67,13 @@ class _ChatMessageListState extends State<ChatMessageList> {
       if (!mounted) return;
 
       setState(() {
-        for (var msg
-            in newMessages.unique((message) => message.messageId).reversed) {
+        for (var msg in newMessages.reversed) {
           if (!_messages.any((m) => m.messageId == msg.messageId)) {
             _messages.insert(0, msg);
           }
         }
         if (_messages.isNotEmpty) {
-          _lastMessage = newMessages.last;
+          _lastMessage = newMessages.first;
         }
       });
       _chatService.markMessagesAsRead(chatId, widget.senderId);
@@ -98,7 +97,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
     List<Message> olderMessages = await _chatService.fetchMessages(
       chatId,
-      lastMessage: _messages.first.log('first msg'),
+      lastMessage: _lastMessage,
     );
     double beforeOffset = _scrollController.offset;
     double beforeMax = _scrollController.position.maxScrollExtent;
