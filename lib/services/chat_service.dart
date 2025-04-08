@@ -26,7 +26,7 @@ class ChatService {
         .collection('messages')
         .doc(message.messageId);
 
-    await messageRef.set(message.toMap());
+    await messageRef.set(message.toMap(useCurrentTime: true));
 
     // Determine last message text based on type
     String lastMessageText = message.text.isNotEmpty

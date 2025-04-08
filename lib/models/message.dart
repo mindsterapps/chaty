@@ -38,14 +38,14 @@ class Message {
   });
 
   // Convert Message to a Map for Firestore storage
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool useCurrentTime = false}) {
     return {
       'messageId': messageId,
       'senderId': senderId,
       'receiverId': receiverId,
       'text': text,
       'mediaUrl': mediaUrl,
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': useCurrentTime ? FieldValue.serverTimestamp() : timestamp,
       'status': status.toString().split('.').last,
       'type': type.toString().split('.').last,
       'isDeleted': isDeleted,
