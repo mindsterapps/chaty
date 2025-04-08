@@ -132,7 +132,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
     if (_scrollController.position.pixels <= threshold &&
         !_isLoadingMore.value &&
         _hasMoreMessages) {
-      _loadMoreMessages();
+      // _loadMoreMessages();
     }
   }
 
