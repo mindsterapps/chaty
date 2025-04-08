@@ -90,7 +90,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
 
   Future<void> _loadMoreMessages() async {
     if (_isLoadingMore.value || !_hasMoreMessages || _lastMessage == null) {
-      ''.log('Already loading or no more messages');
+      _isLoadingMore.value.log('isLoadingMore.value');
+      _hasMoreMessages.log('hasMoreMessages');
+      _lastMessage.log('lastMessage');
       return;
     }
     _isLoadingMore.value = true;
