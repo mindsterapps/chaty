@@ -71,6 +71,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
         messages: _messages
             .where(
                 (message) => selectedController.isSelected(message.messageId))
+            .toList()
+            .reversed
             .toList(),
         deselectAll: clearSelection,
       );
