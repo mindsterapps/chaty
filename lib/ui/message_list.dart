@@ -71,7 +71,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
         messages: _messages
             .where(
                 (message) => selectedController.isSelected(message.messageId))
-            .toList(),deselectAll: clearSelection,
+            .toList(),
+        deselectAll: clearSelection,
       );
     });
     super.initState();
@@ -193,6 +194,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                         },
                         onTap: () {
                           if (selectedController.value.isEmpty) {
+                            FocusManager.instance.primaryFocus?.unfocus();
                             return;
                           }
                           if (selectedController
