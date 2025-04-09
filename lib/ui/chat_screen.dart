@@ -20,8 +20,9 @@ class ChatScreen extends StatefulWidget {
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
   final Function(DateTime lastSeen)? getLastSeen;
   final Function()? onDeleteMessage;
-
-  final void Function({required List<Message> messages})? onMessageSelected;
+  final void Function(
+      {required List<Message> messages,
+      required void Function() deselectAll})? onMessageSelected;
 
   const ChatScreen({
     required this.senderId,

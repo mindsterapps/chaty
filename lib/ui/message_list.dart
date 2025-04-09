@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/message_bubble.dart';
 import 'package:chaty/utils/extensions.dart';
+import 'package:chaty/utils/selection_controller.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
@@ -14,7 +15,9 @@ class ChatMessageList extends StatefulWidget {
   final Function()? onDeleteMessage;
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
-  final void Function({required List<Message> messages})? onMessageSelected;
+  final void Function(
+      {required List<Message> messages,
+      required void Function() deselectAll})? onMessageSelected;
 
   const ChatMessageList({
     required this.senderId,
@@ -42,6 +45,19 @@ class _ChatMessageListState extends State<ChatMessageList> {
   late final String chatId;
   StreamSubscription? _messageSub;
 
+  SelectedController selectedController = SelectedController();
+  void selectAllMessages() {
+    selectedController.selectAll(_messages);
+  }
+
+  void clearSelection() {
+    selectedController.clearSelection();
+  }
+
+  void toggleSelection(String messageId) {
+    selectedController.toggleSelection(messageId);
+  }
+
   @override
   void initState() {
     chatId = _chatService.getChatId(widget.senderId, widget.receiverId);
@@ -55,7 +71,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
         messages: _messages
             .where(
                 (message) => selectedController.isSelected(message.messageId))
-            .toList(),
+            .toList(),deselectAll: clearSelection,
       );
     });
     super.initState();
@@ -140,19 +156,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
     _scrollController.dispose();
     _messageSub?.cancel();
     super.dispose();
-  }
-
-  SelectedController selectedController = SelectedController();
-  void selectAllMessages() {
-    selectedController.selectAll(_messages);
-  }
-
-  void clearSelection() {
-    selectedController.clearSelection();
-  }
-
-  void toggleSelection(String messageId) {
-    selectedController.toggleSelection(messageId);
   }
 
   @override
@@ -270,52 +273,5 @@ class _ChatMessageListState extends State<ChatMessageList> {
         ),
       ],
     );
-  }
-}
-
-class SelectedController extends ValueNotifier<List> {
-  SelectedController() : super([]);
-
-  void selectAll(List items) {
-    value = items;
-    notifyListeners();
-  }
-
-  void clearSelection() {
-    value = [];
-    notifyListeners();
-  }
-
-  bool isSelected(String id) {
-    return value.contains(id);
-  }
-
-  void toggleSelection(String id) {
-    if (value.contains(id)) {
-      value.remove(id);
-    } else {
-      value.add(id);
-    }
-    notifyListeners();
-  }
-
-  void remove(String id) {
-    value.remove(id);
-    notifyListeners();
-  }
-
-  void add(String id) {
-    value.add(id);
-    notifyListeners();
-  }
-
-  void removeAll() {
-    value = [];
-    notifyListeners();
-  }
-
-  void addAll(List ids) {
-    value.addAll(ids);
-    notifyListeners();
   }
 }
