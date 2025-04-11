@@ -1,6 +1,6 @@
 name: chaty
 description: "A firebase chat widget."
-version: 1.0.1
+version: 1.0.2
 homepage: https://github.com/mindsterapps/chaty
 environment:
   sdk: ">=2.12.0 <4.0.0"
