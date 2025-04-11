@@ -117,6 +117,6 @@ class MyApp extends StatelessWidget {
 
 - **Contributing**: Contributions are welcome! Feel free to submit issues or pull requests.
 - **License**: This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-- **Support**: For any issues or feature requests, please open an issue on [GitHub](https://github.com/aswintbbc/chaty/issues).
+- **Support**: For any issues or feature requests, please open an issue on [GitHub](github.com/mindsterapps/chaty/issues).
 
 Happy coding!

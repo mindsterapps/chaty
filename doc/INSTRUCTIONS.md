@@ -4,7 +4,7 @@
 
 1. Clone the repository:
    ```sh
-   git clone https://github.com/aswintbbc/chaty.git
+   git clone https://github.com/mindsterapps/chaty.git
    ```
 2. Navigate to the project directory:
    ```sh
