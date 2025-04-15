@@ -88,7 +88,7 @@ Here is a minimal example to get started:
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:chaty/ui/chat_screen.dart';
+import 'package:chaty/ui/chat_list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -100,12 +100,20 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: ChatScreen(
-        senderId: 'user1',
-        receiverId: 'user2',
-        mediaUploaderFunction: (mediaPath) async {
-          // Simulate media upload
-          return 'uploaded_media_url';
+      home: ChatListScreen(
+        currentUserId: 'user1',
+        chatTileBuilder: ({required chatSummary}) {
+          return ListTile(
+            title: Text("Chat with ${chatSummary.otherUserId}"),
+            subtitle: Text(chatSummary.lastMessage),
+            trailing: Text(chatSummary.lastMessageTime.toLocal().toString()),
+            onTap: () {
+              // Navigate to ChatScreen
+            },
+          );
+        },
+        getnumberOfusers: (int numberOfUsers) {
+          print("Number of users: $numberOfUsers");
         },
       ),
     );
@@ -115,8 +123,9 @@ class MyApp extends StatelessWidget {
 
 ## Additional Information
 
+- **Sample Project**: Check out the [Fire Chat](https://github.com/aswintbbc/fire_chat) repository for a complete example of how to use the Chaty plugin in a real-world application.
 - **Contributing**: Contributions are welcome! Feel free to submit issues or pull requests.
 - **License**: This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-- **Support**: For any issues or feature requests, please open an issue on [GitHub](github.com/mindsterapps/chaty/issues).
+- **Support**: For any issues or feature requests, please open an issue on [GitHub](https://github.com/mindsterapps/chaty/issues).
 
-Happy coding!
+Happy coding! I don't want coffee 😊
