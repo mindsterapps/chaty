@@ -1,5 +1,8 @@
 name: chaty
-description: "A firebase chat widget."
+description: |
+  "A firebase chat widget that allows seamless integration of chat functionality 
+  into your Flutter applications. It supports features like real-time messaging, 
+  notifications, and media sharing, making it ideal for building chat-based apps."
 version: 1.0.3
 homepage: https://github.com/mindsterapps/chaty
 environment:

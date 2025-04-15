@@ -92,7 +92,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
           }
         }
         if (_messages.isNotEmpty) {
-          _lastMessage = newMessages.first;
+          _lastMessage = newMessages.last;
         }
       });
       _chatService.markMessagesAsRead(chatId, widget.senderId);
