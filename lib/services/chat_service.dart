@@ -252,17 +252,19 @@ class ChatService {
     return _firestore
         .collection('chats')
         .where('users', arrayContainsAny: [userId])
-        .orderBy('lastMessageTime', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) {
+          final list = snapshot.docs.map((doc) {
             final data = doc.data().log('snapshot');
 
             return ChatSummary.fromMap(
               data,
               userId,
             );
-          }).toList();
+          }).toList()
+            ..sort((a, b) => b.lastMessageTime
+                .compareTo(a.lastMessageTime)); // Sort by last message time
+          return list;
         });
   }
 }
