@@ -46,8 +46,9 @@ class ChatService {
       'lastMessageTime': FieldValue.serverTimestamp(),
       'lastMessageSender': message.senderId, // Store sender's ID
       'users': [message.senderId, message.receiverId],
-      'unreadMessageCount.${message.receiverId}':
-          FieldValue.increment(1), // ✅ Increase unread count
+      'unreadMessageCount': {
+        '${message.receiverId}': FieldValue.increment(1)
+      }, // ✅ Increase unread count
     }, SetOptions(merge: true));
   }
 
@@ -179,8 +180,9 @@ class ChatService {
           'lastMessageTime': FieldValue.serverTimestamp(),
           'lastMessageSender': message.senderId, // Store sender's ID
           'users': [message.senderId, message.receiverId],
-          'unreadMessageCount.${message.receiverId}':
-              FieldValue.increment(1), // ✅ Increase unread count
+          'unreadMessageCount': {
+            '${message.receiverId}': FieldValue.increment(1)
+          }, // ✅ Increase unread count
         }, SetOptions(merge: true));
         // Delete the message from Firestore
         await messageRef.update({
