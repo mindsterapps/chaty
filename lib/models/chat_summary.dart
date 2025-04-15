@@ -10,7 +10,7 @@ class ChatSummary {
   final List<String> users;
   final String otherUserId;
   final String lastMessageSenderId;
-  final int unreadCount; // 🔥 Added unreadCount
+  final Map<String, int> unreadMessageCount;
 
   ChatSummary({
     required this.chatId,
@@ -20,7 +20,7 @@ class ChatSummary {
     required this.users,
     required this.otherUserId,
     required this.lastMessageSenderId,
-    required this.unreadCount, // 🔥 Initialize unreadCount
+    required this.unreadMessageCount, // 🔥 Initialize unreadCount
   });
 
   factory ChatSummary.fromMap(Map<String, dynamic> map, String currentUserId) {
@@ -47,8 +47,8 @@ class ChatSummary {
                 .firstWhere((id) => id != currentUserId,
                     orElse: () => "Unknown")
             : "Unknown",
-        unreadCount:
-            map['unreadCount'] ?? 0, // 🔥 Fetch unread count from Firestore
+        unreadMessageCount: Map<String, int>.from(map['unreadMessageCount'] ??
+            {}), // 🔥 Fetch unread count from Firestore
       );
     } catch (e) {
       e.log("❌ Error converting Firestore data to ChatSummary");
@@ -60,7 +60,7 @@ class ChatSummary {
         users: [],
         otherUserId: "Unknown",
         lastMessageSenderId: 'Unknown',
-        unreadCount: 0, // 🔥 Default unread count to 0
+        unreadMessageCount: {}, // 🔥 Default unread count to 0
       );
     }
   }
@@ -74,7 +74,8 @@ class ChatSummary {
       'lastMessageTime': lastMessageTime,
       'users': users,
       'lastMessageSender': lastMessageSenderId,
-      'unreadCount': unreadCount, // 🔥 Store unreadCount in Firestore
+      'unreadMessageCount':
+          unreadMessageCount, // 🔥 Store unreadCount in Firestore
     };
   }
 }

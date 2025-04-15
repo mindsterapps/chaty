@@ -58,7 +58,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 return widget.chatTileBuilder!(chatSummary: chat);
               }
               return ListTile(
-                leading: chat.unreadCount > 0
+                leading: chat.unreadMessageCount['${widget.currentUserId}'] !=
+                            null &&
+                        chat.unreadMessageCount['${widget.currentUserId}']! > 0
                     ? CircleAvatar(
                         backgroundColor: Colors.red,
                         radius: 6,

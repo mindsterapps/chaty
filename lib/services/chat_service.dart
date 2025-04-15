@@ -46,7 +46,8 @@ class ChatService {
       'lastMessageTime': FieldValue.serverTimestamp(),
       'lastMessageSender': message.senderId, // Store sender's ID
       'users': [message.senderId, message.receiverId],
-      'unreadCount': FieldValue.increment(1), // ✅ Increase unread count
+      'unreadMessageCount.${message.receiverId}':
+          FieldValue.increment(1), // ✅ Increase unread count
     }, SetOptions(merge: true));
   }
 
@@ -74,22 +75,6 @@ class ChatService {
   }
 
   late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
-
-  /// Fetch messages in real-time
-  Stream<List<Message>> getMessages(String chatId) {
-    print(chatId);
-    final snap = _firestore
-        .collection('chats')
-        .doc(chatId)
-        .collection('messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots();
-
-    return snap.map((snapshot) {
-      lastDocument = snapshot.docs.last;
-      return snapshot.docs.map((doc) => Message.fromMap(doc.data())).toList();
-    });
-  }
 
   int initialLimit = 5;
   Future<List<Message>> fetchMessages(String chatId,
@@ -194,7 +179,8 @@ class ChatService {
           'lastMessageTime': FieldValue.serverTimestamp(),
           'lastMessageSender': message.senderId, // Store sender's ID
           'users': [message.senderId, message.receiverId],
-          'unreadCount': FieldValue.increment(1), // ✅ Increase unread count
+          'unreadMessageCount.${message.receiverId}':
+              FieldValue.increment(1), // ✅ Increase unread count
         }, SetOptions(merge: true));
         // Delete the message from Firestore
         await messageRef.update({
@@ -208,13 +194,13 @@ class ChatService {
   }
 
   /// Mark all unread messages as "read" when the recipient opens the chat
-  Future<void> markMessagesAsRead(String chatId, String receiverId) async {
+  Future<void> markMessagesAsRead(String chatId, String currentUserId) async {
     QuerySnapshot messages = await _firestore
         .collection('chats')
         .doc(chatId)
         .collection('messages')
         .where('receiverId',
-            isEqualTo: receiverId) // Messages meant for this user
+            isEqualTo: currentUserId) // Messages meant for this user
         .where('status', isEqualTo: 'unread')
         .get();
 
@@ -224,7 +210,7 @@ class ChatService {
 
     // ✅ Reset unread count to 0 when user opens chat
     FirebaseFirestore.instance.collection('chats').doc(chatId).update({
-      'unreadCount': 0,
+      'unreadMessageCount.$currentUserId': 0,
     });
   }
 
