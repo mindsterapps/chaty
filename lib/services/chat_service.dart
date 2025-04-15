@@ -252,6 +252,7 @@ class ChatService {
     return _firestore
         .collection('chats')
         .where('users', arrayContainsAny: [userId])
+        .orderBy('lastMessageTime', descending: true)
         .snapshots()
         .map((snapshot) {
           return snapshot.docs.map((doc) {
