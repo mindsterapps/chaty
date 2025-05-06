@@ -1,7 +1,9 @@
 import 'package:chaty/models/chat_summary.dart';
+import 'package:chaty/services/notification_services.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../models/message.dart';
 
 class ChatService {
@@ -16,6 +18,12 @@ class ChatService {
     return instance;
   }
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> initializeFirebase() async {
+    // Initialize Firestore or any other services if needed
+    await Firebase.initializeApp(); // Initialize Firebase
+    await NotificationService().initialize();
+  }
 
   /// Send a new message
   Future<void> sendMessage(Message message) async {

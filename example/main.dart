@@ -1,16 +1,17 @@
 import 'package:chaty/models/message.dart';
-import 'package:chaty/services/notification_services.dart';
+import 'package:chaty/services/chat_service.dart';
 import 'package:chaty/ui/chat_list_screen.dart';
 import 'package:chaty/ui/chat_screen.dart';
 import 'package:chaty/utils/extensions.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(); // Initialize Firebase
-  await NotificationService().initialize();
 
+  /// Checks if the initialization has already been performed and avoids
+  /// re-initializing if it has. This helps prevent redundant operations
+  /// or potential errors caused by multiple initializations.
+  await ChatService.instance.initializeFirebase();
   runApp(const MyApp());
 }
 

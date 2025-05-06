@@ -52,7 +52,6 @@ extension StringExtension on String {
 
 extension Str on int {
   String toOrdinal() {
-    /// TODO: extend range, not accurate after 100
     if (this < 0) throw Exception('Invalid Number');
     if (this >= 11 && this <= 13) {
       return '${this}th';

@@ -13,6 +13,7 @@ enum MessageType {
   image,
   document,
   video,
+  gif,
 }
 
 class Message {
