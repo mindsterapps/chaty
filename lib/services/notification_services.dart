@@ -1,13 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../models/message.dart' as model;
 
 class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Initialize Firebase Messaging & Local Notifications
   Future<void> initialize() async {
@@ -50,26 +47,5 @@ class NotificationService {
       message.notification?.body ?? 'You have a new message',
       details,
     );
-  }
-
-  /// Send push notification to a user
-  Future<void> sendNotification(
-      String receiverId, model.Message message) async {
-    // Get recipient's FCM token
-    DocumentSnapshot userDoc =
-        await _firestore.collection('users').doc(receiverId).get();
-    String? token = userDoc['firebaseToken'];
-
-    if (token != null) {
-      // Send notification via Firebase Cloud Messaging
-      await FirebaseMessaging.instance.sendMessage(
-        to: token,
-        data: {
-          'title': "New Message from ${message.senderId}",
-          'body': message.text,
-          'chatId': message.receiverId,
-        },
-      );
-    }
   }
 }
