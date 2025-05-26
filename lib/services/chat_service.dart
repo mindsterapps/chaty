@@ -263,4 +263,25 @@ class ChatService {
           return list;
         });
   }
+
+Future<int> getTotalUnreadMessagesForUser(String userId) async {
+  final querySnapshot = await _firestore
+      .collection('chats')
+      .where('users', arrayContains: userId)
+      .get();
+
+  int totalUnread = 0;
+
+  for (var doc in querySnapshot.docs) {
+    final data = doc.data();
+    final unreadMap = Map<String, dynamic>.from(data['unreadMessageCount'] ?? {});
+    final userUnread = unreadMap[userId];
+    if (userUnread is int) {
+      totalUnread += userUnread;
+    }
+  }
+
+  return totalUnread;
+}
+
 }
