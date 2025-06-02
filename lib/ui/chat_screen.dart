@@ -6,24 +6,45 @@ import 'message_input.dart';
 import 'dart:async';
 import 'message_list.dart';
 
+/// A screen for displaying and sending chat messages between two users.
+///
+/// Supports custom message input, message bubble, media upload, and message selection callbacks.
 class ChatScreen extends StatefulWidget {
+  /// The ID of the user sending messages.
   final String senderId;
+
+  /// The ID of the user receiving messages.
   final String receiverId;
+
+  /// The initial number of chat messages to load.
   final int? intialChatLimit;
+
+  /// Optional builder for customizing the message input widget.
   final Widget Function(
     BuildContext context, {
     required void Function(String txt) sendMessage,
     required void Function(String mediaPath, MessageType type) sendMediaMessage,
   })? sendMessageBuilder;
+
+  /// Optional builder for customizing the message bubble widget.
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
+
+  /// Optional function for uploading media files.
   final Future<String> Function(String mediaPath)? mediaUploaderFunction;
+
+  /// Optional callback to provide the last seen time of the receiver.
   final Function(DateTime lastSeen)? getLastSeen;
+
+  /// Optional callback for when a message is deleted.
   final Function()? onDeleteMessage;
+
+  /// Optional callback for when messages are selected.
   final void Function(
       {required List<Message> messages,
       required void Function() deselectAll})? onMessageSelected;
 
+  /// Creates a [ChatScreen] widget.
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
@@ -41,6 +62,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
+/// State for [ChatScreen], manages message sending, media upload, and UI updates.
 class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage(ChatService chatService, String text) {
     final message = Message(

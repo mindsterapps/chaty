@@ -2,16 +2,34 @@ import 'package:chaty/utils/extensions.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'message.dart'; // Import MessageType from Message model
 
+/// Represents a summary of a chat, including the last message, users involved,
+/// and unread message counts.
 class ChatSummary {
+  /// Unique identifier for the chat.
   final String chatId;
+
+  /// The last message sent in the chat.
   final String lastMessage;
+
+  /// The type of the last message (text, image, audio, etc.).
   final MessageType lastMessageType;
+
+  /// The time when the last message was sent.
   final DateTime lastMessageTime;
+
+  /// List of user IDs involved in the chat.
   final List<String> users;
+
+  /// The ID of the other user in the chat (not the current user).
   final String otherUserId;
+
+  /// The ID of the user who sent the last message.
   final String lastMessageSenderId;
+
+  /// A map containing the count of unread messages for each user in the chat.
   final Map<String, int> unreadMessageCount;
 
+  /// Creates a new ChatSummary instance.
   ChatSummary({
     required this.chatId,
     required this.lastMessage,
@@ -23,6 +41,8 @@ class ChatSummary {
     required this.unreadMessageCount, // 🔥 Initialize unreadCount
   });
 
+  /// Factory constructor to create a ChatSummary from Firestore data.
+  /// The [currentUserId] is used to determine the other user's ID in the chat.
   factory ChatSummary.fromMap(Map<String, dynamic> map, String currentUserId) {
     try {
       return ChatSummary(
@@ -65,7 +85,7 @@ class ChatSummary {
     }
   }
 
-  // Convert model to Firestore map
+  /// Convert model to Firestore map
   Map<String, dynamic> toMap() {
     return {
       'chatId': chatId,

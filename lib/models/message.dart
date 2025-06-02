@@ -1,31 +1,57 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-enum MessageStatus {
-  delivered,
-  unread,
-  read,
-}
+/// Represents the status of a message in the chat system.
+///
+/// - [delivered]: The message has been delivered to the recipient.
+/// - [unread]: The message has not been read by the recipient.
+/// - [read]: The message has been read by the recipient.
+// ignore: public_member_api_docs
+enum MessageStatus { delivered, unread, read }
 
-enum MessageType {
-  text,
-  audio,
-  voice,
-  image,
-  document,
-  video,
-  gif,
-}
+/// Represents the type of a message in the chat system.
+///
+/// - [text]: A plain text message.
+/// - [audio]: An audio file message.
+/// - [voice]: A voice note message.
+/// - [image]: An image file message.
+/// - [document]: A document file message.
+/// - [video]: A video file message.
+/// - [gif]: A GIF image message.
+// ignore: public_member_api_docs
+enum MessageType { text, audio, voice, image, document, video, gif }
 
+/// Model class representing a chat message.
+///
+/// Contains all relevant information for a message, including sender, receiver, content, type, status, and metadata.
 class Message {
+  /// Unique identifier for the message.
   final String messageId;
+
+  /// ID of the user who sent the message.
   final String senderId;
+
+  /// ID of the user who receives the message.
   final String receiverId;
+
+  /// The text content of the message.
   final String text;
+
+  /// Optional URL for media attached to the message.
   final String? mediaUrl;
+
+  /// Timestamp when the message was sent.
   final DateTime timestamp;
-  final MessageStatus status; // Added status field
-  final MessageType type; // Added type field
+
+  /// Status of the message (delivered, unread, read).
+  final MessageStatus status;
+
+  /// Type of the message (text, audio, etc.).
+  final MessageType type;
+
+  /// Whether the message is deleted.
   final isDeleted;
+
+  /// Creates a [Message] instance.
   Message({
     required this.messageId,
     required this.senderId,
@@ -38,7 +64,9 @@ class Message {
     this.isDeleted = false,
   });
 
-  // Convert Message to a Map for Firestore storage
+  /// Converts the [Message] instance to a map for Firestore storage.
+  ///
+  /// If [useCurrentTime] is true, uses the server timestamp for 'timestamp'.
   Map<String, dynamic> toMap({bool useCurrentTime = false}) {
     return {
       'messageId': messageId,
@@ -53,7 +81,7 @@ class Message {
     };
   }
 
-  // Convert Firestore document to Message
+  /// Creates a [Message] instance from a Firestore document map.
   factory Message.fromMap(Map<String, dynamic> map) {
     return Message(
       messageId: map['messageId'],

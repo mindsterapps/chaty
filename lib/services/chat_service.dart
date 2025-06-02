@@ -6,26 +6,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../models/message.dart';
 
+/// ChatService provides methods to interact with chat functionalities
+/// such as sending messages, updating last seen, and managing chat summaries.
 class ChatService {
-  // Singleton instance
+  /// Singleton instance
   static final ChatService instance = ChatService._internal();
 
   // Private constructor
   ChatService._internal();
 
-  // Factory constructor to return the singleton instance
+  /// Factory constructor to return the singleton instance
   factory ChatService() {
     return instance;
   }
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// Initializes Firebase for chat services.
   Future<void> initializeFirebase() async {
     // Initialize Firestore or any other services if needed
     await Firebase.initializeApp(); // Initialize Firebase
     await NotificationService().initialize();
   }
 
-  /// Send a new message
+  /// Sends a new message and updates chat summary.
   Future<void> sendMessage(Message message) async {
     final chatId = getChatId(message.senderId, message.receiverId);
     DocumentReference messageRef = _firestore
@@ -60,6 +63,7 @@ class ChatService {
     }, SetOptions(merge: true));
   }
 
+  /// Updates the last seen timestamp for a user.
   Future<void> updateLastSeen(String userId) async {
     try {
       await _firestore.collection('users').doc(userId).set(
@@ -71,6 +75,7 @@ class ChatService {
     }
   }
 
+  /// Returns a stream of the last seen timestamp for a user.
   Stream<Timestamp?> getLastSeen(String userId) {
     // Retrieve the updated document to get the lastSeen timestamp
     Stream<DocumentSnapshot<Map<String, dynamic>>> userDoc =
@@ -83,9 +88,13 @@ class ChatService {
     });
   }
 
+  /// The last document fetched for pagination.
   late QueryDocumentSnapshot<Map<String, dynamic>> lastDocument;
 
+  /// The initial limit for message pagination.
   int initialLimit = 5;
+
+  /// Fetches messages for a chat, optionally paginated after [lastMessage].
   Future<List<Message>> fetchMessages(String chatId,
       {Message? lastMessage}) async {
     Query query = _firestore
@@ -118,6 +127,7 @@ class ChatService {
     return messages;
   }
 
+  /// Streams the latest messages for a chat, limited to the initial limit.
   Stream<List<Message>> streamLatestMessages(String chatId) {
     return _firestore
         .collection('chats')
@@ -244,6 +254,7 @@ class ChatService {
     );
   }
 
+  /// Get a stream of chat summaries for a specific user
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
         .collection('chats')

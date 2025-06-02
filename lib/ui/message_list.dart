@@ -7,18 +7,35 @@ import 'package:chaty/utils/selection_controller.dart';
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
+/// A widget that displays a scrollable list of chat messages between two users.
+///
+/// Supports message selection, deletion, custom message bubbles, and loading more messages.
 class ChatMessageList extends StatefulWidget {
+  /// The ID of the user sending messages.
   final String senderId;
+
+  /// The ID of the user receiving messages.
   final String receiverId;
+
+  /// The initial number of chat messages to load.
   final int initialChatLimit;
+
+  /// Optional callback to provide the last seen time of the receiver.
   final Function(DateTime lastSeen)? getLastSeen;
+
+  /// Optional callback for when a message is deleted.
   final Function()? onDeleteMessage;
+
+  /// Optional builder for customizing the message bubble widget.
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
+
+  /// Optional callback for when messages are selected.
   final void Function(
       {required List<Message> messages,
       required void Function() deselectAll})? onMessageSelected;
 
+  /// Creates a [ChatMessageList] widget.
   const ChatMessageList({
     required this.senderId,
     required this.receiverId,
@@ -34,6 +51,7 @@ class ChatMessageList extends StatefulWidget {
   State<ChatMessageList> createState() => _ChatMessageListState();
 }
 
+/// State for [ChatMessageList], manages message loading, selection, and UI updates.
 class _ChatMessageListState extends State<ChatMessageList> {
   final ChatService _chatService = ChatService.instance;
   final ScrollController _scrollController = ScrollController();

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 
+/// Service for handling media storage using Firebase Storage.
 class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 

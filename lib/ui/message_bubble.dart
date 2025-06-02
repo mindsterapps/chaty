@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 
+/// A widget that displays a single chat message bubble.
+///
+/// Shows the message content, media (if any), and status (sent, delivered, read) with alignment based on sender.
 class MessageBubble extends StatelessWidget {
+  /// The message to display in the bubble.
   final Message message;
+
+  /// Whether the message was sent by the current user.
   final bool isMe;
+
+  /// Creates a [MessageBubble] widget.
   const MessageBubble({Key? key, required this.message, required this.isMe})
       : super(key: key);
 

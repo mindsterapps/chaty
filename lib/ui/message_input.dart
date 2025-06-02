@@ -4,10 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// A widget for composing and sending text or audio messages in a chat.
+///
+/// Provides a text input field, send button, and audio recording functionality.
 class MessageInput extends StatefulWidget {
+  /// Callback when a text message is sent.
   final Function(String text) onSendMessage;
+
+  /// Callback when an audio message is sent. The [audioPath] may be null if recording failed.
   final Function(String? audioPath, MessageType type) onSendAudioMessage;
 
+  /// Creates a [MessageInput] widget.
   const MessageInput({
     Key? key,
     required this.onSendMessage,
@@ -18,6 +25,7 @@ class MessageInput extends StatefulWidget {
   State<MessageInput> createState() => _MessageInputState();
 }
 
+/// State for [MessageInput], manages text input, audio recording, and sending messages.
 class _MessageInputState extends State<MessageInput> {
   final TextEditingController _messageController = TextEditingController();
   bool _isRecording = false;

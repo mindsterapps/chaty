@@ -4,12 +4,20 @@ import '../services/chat_service.dart';
 import '../models/chat_summary.dart';
 import 'chat_screen.dart';
 
+/// A screen that displays the list of chats for the current user.
+///
+/// Shows a scrollable list of chat summaries, with support for custom chat tile widgets and a callback for the number of users.
 class ChatListScreen extends StatefulWidget {
+  /// The ID of the current user whose chats are displayed.
   final String currentUserId;
 
+  /// Optional builder for customizing the chat tile widget.
   final Widget Function({required ChatSummary chatSummary})? chatTileBuilder;
+
+  /// Callback to provide the number of users (chats) in the list.
   final Function(int numberOfusers) getnumberOfusers;
 
+  /// Creates a [ChatListScreen].
   ChatListScreen({
     Key? key,
     required this.currentUserId,
@@ -21,6 +29,7 @@ class ChatListScreen extends StatefulWidget {
   State<ChatListScreen> createState() => _ChatListScreenState();
 }
 
+/// State for [ChatListScreen], manages chat list data and UI updates.
 class _ChatListScreenState extends State<ChatListScreen> {
   final ChatService _chatService = ChatService.instance;
 

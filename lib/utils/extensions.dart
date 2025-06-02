@@ -1,6 +1,7 @@
 import 'dart:developer' as d;
 import 'package:flutter/material.dart';
 
+/// Extension methods for String to provide utility functions.
 extension StringExtension on String {
   /// Append the svg location to the string
   String asAssetSvg() => 'assets/svgs/$this.svg';
@@ -25,10 +26,21 @@ extension StringExtension on String {
     return result;
   }
 
+  /// Replaces the character at the specified [index] in the string with [newChar].
+  ///
+  /// Returns a new string with the character at [index] replaced by [newChar].
+  ///
+  /// Throws a [RangeError] if [index] is out of bounds.
+  ///
+  /// Example:
+  /// ```dart
+  /// 'hello'.replaceCharAt(1, 'a'); // returns 'hallo'
+  /// ```
   String replaceCharAt(int index, String newChar) {
     return substring(0, index) + newChar + substring(index + 1);
   }
 
+  /// Converts the string to a double, or returns null if conversion fails.
   double? toDouble() {
     try {
       if (isEmpty) {
@@ -41,6 +53,9 @@ extension StringExtension on String {
     }
   }
 
+  /// Checks if the string has an image file extension.
+  ///
+  /// [imgExt] is the list of valid image extensions.
   bool isImageExtenstion(
       {List<String> imgExt = const <String>['png', 'jpg', 'jpeg', 'gif']}) {
     if (!contains('.')) return false;
@@ -50,7 +65,9 @@ extension StringExtension on String {
   }
 }
 
+/// Extension methods for int to provide ordinal string conversion.
 extension Str on int {
+  /// Converts the integer to its ordinal representation (e.g., 1st, 2nd).
   String toOrdinal() {
     if (this < 0) throw Exception('Invalid Number');
     if (this >= 11 && this <= 13) {
@@ -69,7 +86,9 @@ extension Str on int {
   }
 }
 
+/// Extension methods for double to provide formatting utilities.
 extension Dob on double {
+  /// Removes trailing zeros from a double's string representation.
   String removeZero() {
     RegExp regex = RegExp(r'([.]*0)(?!.*\d)');
 
@@ -77,12 +96,15 @@ extension Dob on double {
     return s;
   }
 
+  /// Formats the double to two decimal places.
   double formatToTwoDecimalPlaces() {
     return (this * 100).round() / 100;
   }
 }
 
+/// Extension methods for Widget to wrap it in a Container with optional size and alignment.
 extension WrapIt on Widget {
+  /// Wraps the widget in a [Container] with optional [height], [width], and [alignment].
   Widget box({
     double? height,
     double? width,
@@ -97,19 +119,24 @@ extension WrapIt on Widget {
   }
 }
 
+/// Extension for logging any object with an optional key.
 extension Logger<E> on E {
+  /// Logs the object with an optional [key] and returns the object.
   E log([String key = '@']) {
     d.log('$key:${toString()}');
     return this;
   }
 }
 
+/// Extension methods for DateTime to provide date helpers.
 extension DateHelpers on DateTime {
+  /// Returns true if the date is today.
   bool get isToday {
     final now = DateTime.now();
     return now.day == day && now.month == month && now.year == year;
   }
 
+  /// Returns true if the date is yesterday.
   bool get isYesterday {
     final yesterday = DateTime.now().subtract(const Duration(days: 1));
     return yesterday.day == day &&
@@ -117,6 +144,7 @@ extension DateHelpers on DateTime {
         yesterday.year == year;
   }
 
+  /// Returns a human-readable string representing the time elapsed since this date.
   String timeAgo({bool numericDates = true}) {
     final date2 = DateTime.now();
     final difference = date2.difference(this);
@@ -143,7 +171,24 @@ extension DateHelpers on DateTime {
   }
 }
 
+/// An extension on [List] that provides functionality for handling unique elements
+/// based on a specified identifier type [Id].
+///
+/// This extension can be used to add utility methods for extracting or filtering
+/// unique elements from a list, where uniqueness is determined by a property or
+/// identifier of type [Id].
+///
+/// Type Parameters:
+/// - [E]: The type of elements in the list.
+/// - [Id]: The type used to determine uniqueness (e.g., a field or property of [E]).
+///
+/// Example usage:
+/// ```dart
+/// final users = [User(id: 1), User(id: 2), User(id: 1)];
+/// final uniqueUsers = users.uniqueBy((user) => user.id);
+/// ```
 extension Unique<E, Id> on List<E> {
+  /// Returns a new list containing unique elements based on the provided [id] function.
   List<E> unique([Id Function(E element)? id, bool inplace = true]) {
     final ids = Set();
     var list = inplace ? this : List<E>.from(this);

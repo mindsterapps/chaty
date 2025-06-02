@@ -19,12 +19,19 @@ Chaty is a Firebase-powered chat widget designed for seamless integration into F
 
 - **Real-time Messaging**: Send and receive messages instantly using Firebase Firestore.
 - **Media Sharing**: Share images, videos, audio, and documents.
-- **Push Notifications**: Get notified of new messages even when the app is in the background.
 - **Customizable UI**: Easily customize chat bubbles, input fields, and more.
 - **Typing Indicators**: Show when the other user is typing.
 - **Unread Message Count**: Keep track of unread messages.
 - **Message Deletion**: Delete messages with confirmation.
 - **Cross-Platform Support**: Works on Android, iOS, Web, and Desktop.
+
+## Screenshots
+
+Below are some screenshots of Chaty in action:
+
+![Chaty Screenshot 1](screenshots/ss1.png)
+
+![Chaty Screenshot 2](screenshots/ss2.png)
 
 ## Getting Started
 
@@ -90,7 +97,13 @@ Here is a minimal example to get started:
 import 'package:flutter/material.dart';
 import 'package:chaty/ui/chat_list_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  /// Checks if the initialization has already been performed and avoids
+  /// re-initializing if it has. This helps prevent redundant operations
+  /// or potential errors caused by multiple initializations.
+  await ChatService.instance.initializeFirebase();//remove if already initalised.
   runApp(const MyApp());
 }
 
