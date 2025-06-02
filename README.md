@@ -28,10 +28,9 @@ Chaty is a Firebase-powered chat widget designed for seamless integration into F
 ## Screenshots
 
 Below are some screenshots of Chaty in action:
-<p>
+
 <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/sr1.gif?raw=true" width="30%" alt="logo" />
-<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss1.png?raw=true" width="30%" alt="logo" />
-</p>
+
 ## Getting Started
 
 ### Prerequisites
