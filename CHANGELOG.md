@@ -1,4 +1,4 @@
-## 1.0.7
+## 1.0.8
 
 - Added typing indication options.
 - Added comprehensive documentation comments for all major widgets, models, and controllers to improve code maintainability and developer experience.
