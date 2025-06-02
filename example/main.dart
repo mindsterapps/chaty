@@ -88,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         context, {
                         required sendMediaMessage,
                         required sendMessage,
+                        onTypingMessage,
                       }) {
                         return _SendMessageWidget(
                           messageController: _messageController,
@@ -138,8 +139,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                   context, {
                                   required sendMediaMessage,
                                   required sendMessage,
+                                  onTypingMessage,
                                 }) {
                                   return _SendMessageWidget(
+                                    onTypingMessage: onTypingMessage,
                                     messageController: _messageController,
                                     sendMessage: sendMessage,
                                     sendAudioMessage: sendMediaMessage,
@@ -212,9 +215,11 @@ class _SendMessageWidget extends StatelessWidget {
   const _SendMessageWidget({
     required TextEditingController messageController,
     required this.sendMessage,
+    this.onTypingMessage,
     required this.sendAudioMessage,
   }) : _messageController = messageController;
   final void Function(String msg) sendMessage;
+  final void Function(String msg)? onTypingMessage;
   final void Function(String msg, MessageType type) sendAudioMessage;
   final TextEditingController _messageController;
 
@@ -233,6 +238,7 @@ class _SendMessageWidget extends StatelessWidget {
           ),
           Expanded(
             child: TextField(
+              onChanged: onTypingMessage,
               controller: _messageController,
               onSubmitted: (text) {
                 // Send text message

@@ -19,11 +19,22 @@ class ChatScreen extends StatefulWidget {
   /// The initial number of chat messages to load.
   final int? intialChatLimit;
 
+  /// Whether to enable the delete message feature.
+  final bool enableDeleteMessage;
+
   /// Optional builder for customizing the message input widget.
+  /// This builder provides a context and functions to send text and media messages,
+  /// and optionally handle typing status.
+  /// If not provided, a default [MessageInput] widget will be used.
+  /// This builder can also handle media messages.
+  /// [onTypingMessage] have to call when the user types a message.
+  /// It can be null if typing status is not needed.
+  /// call [onTypingMessage] function in TextField's onChange.
   final Widget Function(
     BuildContext context, {
     required void Function(String txt) sendMessage,
     required void Function(String mediaPath, MessageType type) sendMediaMessage,
+    void Function(String text)? onTypingMessage,
   })? sendMessageBuilder;
 
   /// Optional builder for customizing the message bubble widget.
@@ -44,16 +55,28 @@ class ChatScreen extends StatefulWidget {
       {required List<Message> messages,
       required void Function() deselectAll})? onMessageSelected;
 
+  /// Optional function to handle typing status updates.
+  /// This function should be called when the user types a message.
+  final Widget Function()? typingIdicationBuilder;
+
+  /// Whether to enable typing status updates.
+  /// If true, typing status will be sent when the user types a message.
+  final bool enableTypingStatus;
+
   /// Creates a [ChatScreen] widget.
+  /// deleteMessage feature is enabled by default.
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
+    this.enableDeleteMessage = true,
     this.sendMessageBuilder,
     this.messageBubbleBuilder,
     this.mediaUploaderFunction,
     this.intialChatLimit,
     this.getLastSeen,
     this.onDeleteMessage,
+    this.enableTypingStatus = false,
+    this.typingIdicationBuilder,
     Key? key,
     this.onMessageSelected,
   }) : super(key: key);
@@ -97,6 +120,16 @@ class _ChatScreenState extends State<ChatScreen> {
     chatService.sendMessage(message);
   }
 
+  Timer? _typingTimer;
+
+  void onTyping(String text) {
+    chatService.setTypingStatus(widget.senderId, widget.receiverId, true);
+    _typingTimer?.cancel();
+    _typingTimer = Timer(Duration(seconds: 5), () {
+      chatService.setTypingStatus(widget.senderId, widget.receiverId, false);
+    });
+  }
+
   final chatService = ChatService.instance;
 
   @override
@@ -106,6 +139,7 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ChatMessageList(
+              enableDeleteMessage: widget.enableDeleteMessage,
               onMessageSelected: widget.onMessageSelected,
               senderId: widget.senderId,
               receiverId: widget.receiverId,
@@ -115,8 +149,24 @@ class _ChatScreenState extends State<ChatScreen> {
               messageBubbleBuilder: widget.messageBubbleBuilder,
             ),
           ),
+          widget.typingIdicationBuilder?.call() ??
+              (widget.enableTypingStatus
+                  ? StreamBuilder<bool>(
+                      stream: chatService.typingStatusStream(
+                        widget.senderId,
+                        widget.receiverId,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData && snapshot.data == true) {
+                          return Text("Typing...");
+                        }
+                        return SizedBox.shrink();
+                      },
+                    )
+                  : SizedBox.shrink()),
           widget.sendMessageBuilder?.call(
                 context,
+                onTypingMessage: widget.enableTypingStatus ? onTyping : null,
                 sendMessage: (txt) => _sendMessage(chatService, txt),
                 sendMediaMessage: (path, type) =>
                     _sendMediaMessage(chatService, path, type),

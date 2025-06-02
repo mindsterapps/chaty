@@ -30,6 +30,9 @@ class ChatMessageList extends StatefulWidget {
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
 
+  /// Optional callback for sending selected messages.
+  final bool enableDeleteMessage;
+
   /// Optional callback for when messages are selected.
   final void Function(
       {required List<Message> messages,
@@ -37,6 +40,7 @@ class ChatMessageList extends StatefulWidget {
 
   /// Creates a [ChatMessageList] widget.
   const ChatMessageList({
+    required this.enableDeleteMessage,
     required this.senderId,
     required this.receiverId,
     this.initialChatLimit = 15,
@@ -202,7 +206,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
                       if (message.isDeleted) return Container();
                       return GestureDetector(
                         onHorizontalDragEnd: (details) {
-                          if (isMe) swipe.value = !swipe.value;
+                          if (isMe && widget.enableDeleteMessage)
+                            swipe.value = !swipe.value;
                         },
                         onLongPress: () {
                           if (selectedController

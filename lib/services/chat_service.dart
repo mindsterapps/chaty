@@ -234,26 +234,6 @@ class ChatService {
     });
   }
 
-  /// Update typing status in Firestore
-  Future<void> updateTypingStatus(
-      String chatId, String userId, bool isTyping) async {
-    await _firestore.collection('chats').doc(chatId).update({
-      'typingStatus.$userId': isTyping,
-    });
-  }
-
-  /// Listen to typing status changes
-  Stream<Map<String, dynamic>?> getTypingStatus(String chatId) {
-    return _firestore.collection('chats').doc(chatId).snapshots().map(
-      (snapshot) {
-        if (snapshot.exists && snapshot.data()!.containsKey('typingStatus')) {
-          return snapshot.data()!['typingStatus'] as Map<String, dynamic>;
-        }
-        return null;
-      },
-    );
-  }
-
   /// Get a stream of chat summaries for a specific user
   Stream<List<ChatSummary>> getUserChats(String userId) {
     return _firestore
@@ -295,6 +275,31 @@ class ChatService {
       }
 
       return totalUnread;
+    });
+  }
+
+  /// Set the typing status for a user in a chat
+  /// This updates the typing status in Firestore for the specified chat and user.
+  Future<void> setTypingStatus(
+      String senderId, String receiverId, bool isTyping) {
+    final chatId = getChatId(senderId, receiverId);
+    return _firestore.collection('chats').doc(chatId).update({
+      'typingStatus.$senderId': isTyping,
+    });
+  }
+
+  /// Get the typing status of the other user in a chat
+  /// Returns a stream that emits true if the other user is typing, false otherwise.
+  Stream<bool> typingStatusStream(String senderId, String receiverId) {
+    final chatId = getChatId(senderId, receiverId);
+    return _firestore
+        .collection('chats')
+        .doc(chatId)
+        .snapshots()
+        .map((snapshot) {
+      final data = snapshot.data();
+      if (data == null || data['typingStatus'] == null) return false;
+      return data['typingStatus'][receiverId] ?? false;
     });
   }
 }
