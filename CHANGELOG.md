@@ -1,4 +1,5 @@
-## 1.0.6
+## 1.0.7
 
-* Added comprehensive documentation comments for all major widgets, models, and controllers to improve code maintainability and developer experience.
-* added option to [disable/enable] delete option.
+- Added typing indication options.
+- Added comprehensive documentation comments for all major widgets, models, and controllers to improve code maintainability and developer experience.
+- added option to [disable/enable] delete option.

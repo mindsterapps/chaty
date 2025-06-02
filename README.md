@@ -29,9 +29,9 @@ Chaty is a Firebase-powered chat widget designed for seamless integration into F
 
 Below are some screenshots of Chaty in action:
 
-![Chaty Screenshot 1](screenshots/ss1.png)
+![Chaty Screenshot 1](https://github.com/mindsterapps/chaty/blob/main/screenshots/ss1.png?raw=true)
 
-![Chaty Screenshot 2](screenshots/ss2.png)
+![Chaty Screenshot 2](https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png?raw=true)
 
 ## Getting Started
 
@@ -59,7 +59,7 @@ Below are some screenshots of Chaty in action:
 1. Add Chaty to your `pubspec.yaml`:
    ```yaml
    dependencies:
-     chaty: ^1.0.0
+     chaty: ^X.X.X
    ```
 2. Run the following command to install the package:
    ```sh
