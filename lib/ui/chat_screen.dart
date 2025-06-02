@@ -88,6 +88,7 @@ class ChatScreen extends StatefulWidget {
 /// State for [ChatScreen], manages message sending, media upload, and UI updates.
 class _ChatScreenState extends State<ChatScreen> {
   void _sendMessage(ChatService chatService, String text) {
+    chatService.setTypingStatus(widget.senderId, widget.receiverId, false);
     final message = Message(
       messageId: DateTime.now().millisecondsSinceEpoch.toString(),
       senderId: widget.senderId,
@@ -103,6 +104,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMediaMessage(
       ChatService chatService, String? mediaPath, MessageType type) async {
+    chatService.setTypingStatus(widget.senderId, widget.receiverId, false);
     if (mediaPath == null) return;
     final path = await widget.mediaUploaderFunction?.call(mediaPath);
     if (path == null) return;

@@ -59,7 +59,7 @@ class ChatService {
       'users': [message.senderId, message.receiverId],
       'unreadMessageCount': {'${message.receiverId}': FieldValue.increment(1)},
       'typingStatus': {
-        '${message.senderId}': true,
+        '${message.senderId}': false,
         '${message.receiverId}': false,
       },
     }, SetOptions(merge: true));
