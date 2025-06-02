@@ -29,7 +29,7 @@ Chaty is a Firebase-powered chat widget designed for seamless integration into F
 
 Below are some screenshots of Chaty in action:
 
-<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss1.png" width="30%" alt="logo" />
+<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss1.png?raw=true" width="30%" alt="logo" />
 
 ## Getting Started
 
@@ -87,7 +87,7 @@ To integrate Chaty into your Flutter app:
 
 For more examples, check the `/example` folder.
 
-<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png" width="30%" alt="logo" />
+<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png?raw=true" width="30%" alt="logo" />
 
 ## Example
 
