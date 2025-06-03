@@ -218,7 +218,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           if (showDateDivider)
-                            _buildDateDivider(message.timestamp),
+                            _DateDivider(date: message.timestamp),
                           GestureDetector(
                             onHorizontalDragEnd: (details) {
                               if (isMe && widget.enableDeleteMessage)
@@ -324,20 +324,38 @@ class _ChatMessageListState extends State<ChatMessageList> {
   bool isSameDate(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
+}
 
-  Widget _buildDateDivider(DateTime date) {
+class _DateDivider extends StatefulWidget {
+  const _DateDivider({
+    Key? key,
+    required this.date,
+  }) : super(key: key);
+  final DateTime date;
+
+  @override
+  State<_DateDivider> createState() => _DateDividerState();
+}
+
+class _DateDividerState extends State<_DateDivider> {
+  @override
+  void initState() {
     final now = DateTime.now();
-    final diff = now.difference(date).inDays;
+    final diff = now.difference(widget.date).inDays;
 
-    String label;
     if (diff == 0) {
       label = 'Today';
     } else if (diff == 1) {
       label = 'Yesterday';
     } else {
-      label = "${date.day}/${date.month}/${date.year}";
+      label = "${widget.date.day}/${widget.date.month}/${widget.date.year}";
     }
+    super.initState();
+  }
 
+  late String label;
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Center(
