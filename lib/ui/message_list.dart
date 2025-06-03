@@ -340,17 +340,22 @@ class _DateDivider extends StatefulWidget {
 class _DateDividerState extends State<_DateDivider> {
   @override
   void initState() {
-    final now = DateTime.now();
-    final diff = now.difference(widget.date).inDays;
-
-    if (diff == 0) {
-      label = 'Today';
-    } else if (diff == 1) {
-      label = 'Yesterday';
-    } else {
-      label = "${widget.date.day}/${widget.date.month}/${widget.date.year}";
-    }
+    label = formatDateDivider(widget.date);
     super.initState();
+  }
+
+  String formatDateDivider(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final msgDate = DateTime(date.year, date.month, date.day);
+
+    if (msgDate == today) {
+      return "Today";
+    } else if (msgDate == today.subtract(Duration(days: 1))) {
+      return "Yesterday";
+    } else {
+      return "${date.day}/${date.month}/${date.year}";
+    }
   }
 
   late String label;
