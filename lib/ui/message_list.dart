@@ -202,96 +202,115 @@ class _ChatMessageListState extends State<ChatMessageList> {
                     itemBuilder: (context, index) {
                       final message = _messages[index];
                       final isMe = message.senderId == widget.senderId;
+
+                      // Get previous message date (if any)
+                      DateTime? previousDate;
+                      if (index + 1 < _messages.length) {
+                        previousDate = _messages[index + 1].timestamp;
+                      }
+
+                      // Check if this message is from a new day
+                      final showDateDivider = previousDate == null ||
+                          !isSameDate(previousDate, message.timestamp);
                       ValueNotifier<bool> swipe = ValueNotifier(false);
                       if (message.isDeleted) return Container();
-                      return GestureDetector(
-                        onHorizontalDragEnd: (details) {
-                          if (isMe && widget.enableDeleteMessage)
-                            swipe.value = !swipe.value;
-                        },
-                        onLongPress: () {
-                          if (selectedController
-                              .isSelected(message.messageId)) {
-                            selectedController.remove(message.messageId);
-                          } else {
-                            selectedController.add(message.messageId);
-                          }
-                        },
-                        onTap: () {
-                          if (selectedController.value.isEmpty) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                            return;
-                          }
-                          if (selectedController
-                              .isSelected(message.messageId)) {
-                            selectedController.remove(message.messageId);
-                          } else {
-                            selectedController.add(message.messageId);
-                          }
-                        },
-                        child: Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 2,
-                                color: selectedController
-                                        .isSelected(message.messageId)
-                                    ? Colors.blue.withAlpha(20)
-                                    : Colors.transparent,
-                              ),
-                              color: selectedController
-                                      .isSelected(message.messageId)
-                                  ? Colors.blue.withAlpha(50)
-                                  : Colors.transparent,
-                            ),
-                            child: ValueListenableBuilder(
-                                valueListenable: swipe,
-                                builder: (context, _, __) {
-                                  return AnimatedSwitcher(
-                                    duration: Duration(milliseconds: 300),
-                                    child: swipe.value
-                                        ? Container(
-                                            key: ValueKey(2),
-                                            width: 300,
-                                            height: 100,
-                                            color: Colors.white,
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 16),
-                                            child: Row(
-                                              children: [
-                                                Expanded(
-                                                  child: Text(
-                                                    "Are you sure you want to delete?",
-                                                    style:
-                                                        TextStyle(fontSize: 16),
-                                                  ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (showDateDivider)
+                            _buildDateDivider(message.timestamp),
+                          GestureDetector(
+                            onHorizontalDragEnd: (details) {
+                              if (isMe && widget.enableDeleteMessage)
+                                swipe.value = !swipe.value;
+                            },
+                            onLongPress: () {
+                              if (selectedController
+                                  .isSelected(message.messageId)) {
+                                selectedController.remove(message.messageId);
+                              } else {
+                                selectedController.add(message.messageId);
+                              }
+                            },
+                            onTap: () {
+                              if (selectedController.value.isEmpty) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                return;
+                              }
+                              if (selectedController
+                                  .isSelected(message.messageId)) {
+                                selectedController.remove(message.messageId);
+                              } else {
+                                selectedController.add(message.messageId);
+                              }
+                            },
+                            child: Container(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 2,
+                                    color: selectedController
+                                            .isSelected(message.messageId)
+                                        ? Colors.blue.withAlpha(20)
+                                        : Colors.transparent,
+                                  ),
+                                  color: selectedController
+                                          .isSelected(message.messageId)
+                                      ? Colors.blue.withAlpha(50)
+                                      : Colors.transparent,
+                                ),
+                                child: ValueListenableBuilder(
+                                    valueListenable: swipe,
+                                    builder: (context, _, __) {
+                                      return AnimatedSwitcher(
+                                        duration: Duration(milliseconds: 300),
+                                        child: swipe.value
+                                            ? Container(
+                                                key: ValueKey(2),
+                                                width: 300,
+                                                height: 100,
+                                                color: Colors.white,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 16),
+                                                child: Row(
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        "Are you sure you want to delete?",
+                                                        style: TextStyle(
+                                                            fontSize: 16),
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(Icons.cancel,
+                                                          color: Colors.grey),
+                                                      onPressed: () {
+                                                        swipe.value =
+                                                            !swipe.value;
+                                                      },
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(Icons.delete,
+                                                          color: Colors.red),
+                                                      onPressed: () {
+                                                        if (isMe)
+                                                          _confirmDeleteMessage(
+                                                              message);
+                                                      },
+                                                    ),
+                                                  ],
                                                 ),
-                                                IconButton(
-                                                  icon: Icon(Icons.cancel,
-                                                      color: Colors.grey),
-                                                  onPressed: () {
-                                                    swipe.value = !swipe.value;
-                                                  },
-                                                ),
-                                                IconButton(
-                                                  icon: Icon(Icons.delete,
-                                                      color: Colors.red),
-                                                  onPressed: () {
-                                                    if (isMe)
-                                                      _confirmDeleteMessage(
-                                                          message);
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          )
-                                        : widget.messageBubbleBuilder?.call(
-                                              message: message,
-                                              isMe: isMe,
-                                            ) ??
-                                            MessageBubble(
-                                                isMe: isMe, message: message),
-                                  );
-                                })),
+                                              )
+                                            : widget.messageBubbleBuilder?.call(
+                                                  message: message,
+                                                  isMe: isMe,
+                                                ) ??
+                                                MessageBubble(
+                                                    isMe: isMe,
+                                                    message: message),
+                                      );
+                                    })),
+                          ),
+                        ],
                       );
                     },
                   ),
@@ -299,6 +318,38 @@ class _ChatMessageListState extends State<ChatMessageList> {
               }),
         ),
       ],
+    );
+  }
+
+  bool isSameDate(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  Widget _buildDateDivider(DateTime date) {
+    final now = DateTime.now();
+    final diff = now.difference(date).inDays;
+
+    String label;
+    if (diff == 0) {
+      label = 'Today';
+    } else if (diff == 1) {
+      label = 'Yesterday';
+    } else {
+      label = "${date.day}/${date.month}/${date.year}";
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade300,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Text(label, style: const TextStyle(color: Colors.black54)),
+        ),
+      ),
     );
   }
 }
