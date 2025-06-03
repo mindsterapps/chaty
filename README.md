@@ -63,6 +63,10 @@ Below are some screenshots of Chaty in action:
    ```sh
    flutter pub get
    ```
+   <p>
+   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss3.png?raw=true" width="30%" alt="logo" />
+   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png?raw=true" width="30%" alt="logo" />
+   </p>
 
 ## Usage
 
@@ -86,8 +90,6 @@ To integrate Chaty into your Flutter app:
    ```
 
 For more examples, check the `/example` folder.
-
-<img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png?raw=true" width="30%" alt="logo" />
 
 ## Example
 
