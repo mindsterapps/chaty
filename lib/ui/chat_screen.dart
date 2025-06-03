@@ -163,21 +163,21 @@ class _ChatScreenState extends State<ChatScreen> {
               messageBubbleBuilder: widget.messageBubbleBuilder,
             ),
           ),
-          widget.typingIdicationBuilder?.call() ??
-              (widget.enableTypingStatus
-                  ? StreamBuilder<bool>(
-                      stream: chatService.typingStatusStream(
-                        widget.senderId,
-                        widget.receiverId,
-                      ),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && snapshot.data == true) {
-                          return Text("Typing...");
-                        }
-                        return SizedBox.shrink();
-                      },
-                    )
-                  : SizedBox.shrink()),
+          (widget.enableTypingStatus
+              ? StreamBuilder<bool>(
+                  stream: chatService.typingStatusStream(
+                    widget.senderId,
+                    widget.receiverId,
+                  ),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData && snapshot.data == true) {
+                      return widget.typingIdicationBuilder?.call() ??
+                          Text("Typing...");
+                    }
+                    return SizedBox.shrink();
+                  },
+                )
+              : SizedBox.shrink()),
           widget.sendMessageBuilder?.call(
                 context,
                 onTypingMessage: widget.enableTypingStatus ? onTyping : null,
