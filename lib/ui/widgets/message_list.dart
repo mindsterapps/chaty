@@ -1,11 +1,12 @@
 import 'dart:async';
 
 import 'package:chaty/services/chat_service.dart';
-import 'package:chaty/ui/message_bubble.dart';
+import 'package:chaty/ui/widgets/date_divider.dart';
+import 'package:chaty/ui/widgets/message_bubble.dart';
 import 'package:chaty/utils/extensions.dart';
 import 'package:chaty/utils/selection_controller.dart';
 import 'package:flutter/material.dart';
-import '../models/message.dart';
+import '../../models/message.dart';
 
 /// A widget that displays a scrollable list of chat messages between two users.
 ///
@@ -30,6 +31,13 @@ class ChatMessageList extends StatefulWidget {
   final Widget Function({required Message message, required bool isMe})?
       messageBubbleBuilder;
 
+  /// Divide chat date-vise, [label] will be the divided date.
+  final Widget Function(String label)? dividerBuilder;
+
+  /// Enable/disable date-vise divider.
+  /// Default value will be ``true``
+  final bool enableDivider;
+
   /// Optional callback for sending selected messages.
   final bool enableDeleteMessage;
 
@@ -43,9 +51,11 @@ class ChatMessageList extends StatefulWidget {
     required this.enableDeleteMessage,
     required this.senderId,
     required this.receiverId,
+    required this.enableDivider,
     this.initialChatLimit = 15,
     this.getLastSeen,
     this.onDeleteMessage,
+    this.dividerBuilder,
     this.messageBubbleBuilder,
     Key? key,
     this.onMessageSelected,
@@ -208,17 +218,22 @@ class _ChatMessageListState extends State<ChatMessageList> {
                       if (index + 1 < _messages.length) {
                         previousDate = _messages[index + 1].timestamp;
                       }
-
                       // Check if this message is from a new day
                       final showDateDivider = previousDate == null ||
                           !isSameDate(previousDate, message.timestamp);
+
                       ValueNotifier<bool> swipe = ValueNotifier(false);
                       if (message.isDeleted) return Container();
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          if (showDateDivider)
-                            _DateDivider(date: message.timestamp),
+                          if (showDateDivider && widget.enableDivider)
+                            widget.dividerBuilder?.call(
+                                  formatDateDivider(message.timestamp),
+                                ) ??
+                                DateDivider(
+                                  label: formatDateDivider(message.timestamp),
+                                ),
                           GestureDetector(
                             onHorizontalDragEnd: (details) {
                               if (isMe && widget.enableDeleteMessage)
@@ -324,25 +339,6 @@ class _ChatMessageListState extends State<ChatMessageList> {
   bool isSameDate(DateTime a, DateTime b) {
     return a.year == b.year && a.month == b.month && a.day == b.day;
   }
-}
-
-class _DateDivider extends StatefulWidget {
-  const _DateDivider({
-    Key? key,
-    required this.date,
-  }) : super(key: key);
-  final DateTime date;
-
-  @override
-  State<_DateDivider> createState() => _DateDividerState();
-}
-
-class _DateDividerState extends State<_DateDivider> {
-  @override
-  void initState() {
-    label = formatDateDivider(widget.date);
-    super.initState();
-  }
 
   String formatDateDivider(DateTime date) {
     final now = DateTime.now();
@@ -356,23 +352,5 @@ class _DateDividerState extends State<_DateDivider> {
     } else {
       return "${date.day}/${date.month}/${date.year}";
     }
-  }
-
-  late String label;
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(label, style: const TextStyle(color: Colors.black54)),
-        ),
-      ),
-    );
   }
 }

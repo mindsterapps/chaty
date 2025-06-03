@@ -12,4 +12,4 @@ export 'package:chaty/services/notification_services.dart';
 
 // Export UI Components
 export 'ui/chat_screen.dart';
-export 'ui/message_bubble.dart';
+export 'ui/widgets/message_bubble.dart';

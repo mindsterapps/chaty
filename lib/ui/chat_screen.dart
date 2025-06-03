@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/message.dart';
 import '../services/chat_service.dart';
-import 'message_input.dart';
+import 'widgets/message_input.dart';
 
 import 'dart:async';
-import 'message_list.dart';
+import 'widgets/message_list.dart';
 
 /// A screen for displaying and sending chat messages between two users.
 ///
@@ -59,6 +59,13 @@ class ChatScreen extends StatefulWidget {
   /// This function should be called when the user types a message.
   final Widget Function()? typingIdicationBuilder;
 
+  /// Divide chat date-vise, [label] will be the divided date.
+  final Widget Function(String label)? dividerBuilder;
+
+  /// Enable/disable date-vise divider.
+  /// Default value will be ``true``
+  final bool enableDivider;
+
   /// Whether to enable typing status updates.
   /// If true, typing status will be sent when the user types a message.
   final bool enableTypingStatus;
@@ -68,6 +75,7 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
+    this.enableDivider = true,
     this.enableDeleteMessage = true,
     this.sendMessageBuilder,
     this.messageBubbleBuilder,
@@ -75,6 +83,7 @@ class ChatScreen extends StatefulWidget {
     this.intialChatLimit,
     this.getLastSeen,
     this.onDeleteMessage,
+    this.dividerBuilder,
     this.enableTypingStatus = false,
     this.typingIdicationBuilder,
     Key? key,
@@ -142,6 +151,8 @@ class _ChatScreenState extends State<ChatScreen> {
         children: [
           Expanded(
             child: ChatMessageList(
+              enableDivider: widget.enableDivider,
+              dividerBuilder: widget.dividerBuilder,
               enableDeleteMessage: widget.enableDeleteMessage,
               onMessageSelected: widget.onMessageSelected,
               senderId: widget.senderId,
