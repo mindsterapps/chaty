@@ -62,6 +62,12 @@ class ChatScreen extends StatefulWidget {
   /// This function should be called when the user types a message.
   final Widget Function()? typingIdicationBuilder;
 
+  /// Optional app bar for the chat screen.
+  /// If not provided, no app bar will be displayed.
+  /// You can use this to add a custom app bar with title, actions, etc.
+  /// If you want to use the default app bar, you can pass an empty [PreferredSizeWidget].
+  final PreferredSizeWidget? appBar;
+
   /// Divide chat date-vise, [label] will be the divided date.
   final Widget Function(String label)? dividerBuilder;
 
@@ -78,6 +84,7 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
+    this.appBar,
     this.backgroundColor,
     this.enableDivider = true,
     this.enableDeleteMessage = true,
@@ -150,6 +157,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.appBar,
       backgroundColor: widget.backgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
