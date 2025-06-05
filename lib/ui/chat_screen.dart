@@ -22,6 +22,9 @@ class ChatScreen extends StatefulWidget {
   /// Whether to enable the delete message feature.
   final bool enableDeleteMessage;
 
+  /// Color for the background of the chat screen.
+  final Color? backgroundColor;
+
   /// Optional builder for customizing the message input widget.
   /// This builder provides a context and functions to send text and media messages,
   /// and optionally handle typing status.
@@ -75,6 +78,7 @@ class ChatScreen extends StatefulWidget {
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
+    this.backgroundColor,
     this.enableDivider = true,
     this.enableDeleteMessage = true,
     this.sendMessageBuilder,
@@ -146,6 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: widget.backgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
