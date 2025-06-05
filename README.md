@@ -64,8 +64,8 @@ Below are some screenshots of Chaty in action:
    flutter pub get
    ```
    <p>
-   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss3.png?raw=true" width="30%" alt="logo" />
-   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss2.png?raw=true" width="30%" alt="logo" />
+   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss4.png?raw=true" width="30%" alt="logo" />
+   <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/ss5.png?raw=true" width="30%" alt="logo" />
    </p>
 
 ## Usage

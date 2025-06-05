@@ -17,12 +17,16 @@ class ChatListScreen extends StatefulWidget {
   /// Callback to provide the number of users (chats) in the list.
   final Function(int numberOfusers) getnumberOfusers;
 
+  /// Optional background color for the chat list screen.
+  final Color? backgroundColor;
+
   /// Creates a [ChatListScreen].
   ChatListScreen({
     Key? key,
+    required this.getnumberOfusers,
     required this.currentUserId,
     this.chatTileBuilder,
-    required this.getnumberOfusers,
+    this.backgroundColor,
   }) : super(key: key);
 
   @override
@@ -38,7 +42,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: widget.backgroundColor,
       body: StreamBuilder<List<ChatSummary>>(
         stream: _chatService.getUserChats(widget.currentUserId),
         builder: (context, snapshot) {
