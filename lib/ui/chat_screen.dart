@@ -79,11 +79,16 @@ class ChatScreen extends StatefulWidget {
   /// If true, typing status will be sent when the user types a message.
   final bool enableTypingStatus;
 
+  /// Optional background image for the chat screen.
+  /// If provided, this image will be displayed as the background of the chat screen.
+  final DecorationImage? backgroundImage;
+
   /// Creates a [ChatScreen] widget.
   /// deleteMessage feature is enabled by default.
   const ChatScreen({
     required this.senderId,
     required this.receiverId,
+    this.backgroundImage,
     this.appBar,
     this.backgroundColor,
     this.enableDivider = true,
@@ -159,51 +164,54 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: widget.appBar,
       backgroundColor: widget.backgroundColor,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ChatMessageList(
-              enableDivider: widget.enableDivider,
-              dividerBuilder: widget.dividerBuilder,
-              enableDeleteMessage: widget.enableDeleteMessage,
-              onMessageSelected: widget.onMessageSelected,
-              senderId: widget.senderId,
-              receiverId: widget.receiverId,
-              initialChatLimit: widget.intialChatLimit ?? 15,
-              getLastSeen: widget.getLastSeen,
-              onDeleteMessage: widget.onDeleteMessage,
-              messageBubbleBuilder: widget.messageBubbleBuilder,
-            ),
-          ),
-          (widget.enableTypingStatus
-              ? StreamBuilder<bool>(
-                  stream: chatService.typingStatusStream(
-                    widget.senderId,
-                    widget.receiverId,
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData && snapshot.data == true) {
-                      return widget.typingIdicationBuilder?.call() ??
-                          Text("Typing...");
-                    }
-                    return SizedBox.shrink();
-                  },
-                )
-              : SizedBox.shrink()),
-          widget.sendMessageBuilder?.call(
-                context,
-                onTypingMessage: widget.enableTypingStatus ? onTyping : null,
-                sendMessage: (txt) => _sendMessage(chatService, txt),
-                sendMediaMessage: (path, type) =>
-                    _sendMediaMessage(chatService, path, type),
-              ) ??
-              MessageInput(
-                onSendMessage: (txt) => _sendMessage(chatService, txt),
-                onSendAudioMessage: (path, type) =>
-                    _sendMediaMessage(chatService, path, type),
+      body: Container(
+        decoration: BoxDecoration(image: widget.backgroundImage),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ChatMessageList(
+                enableDivider: widget.enableDivider,
+                dividerBuilder: widget.dividerBuilder,
+                enableDeleteMessage: widget.enableDeleteMessage,
+                onMessageSelected: widget.onMessageSelected,
+                senderId: widget.senderId,
+                receiverId: widget.receiverId,
+                initialChatLimit: widget.intialChatLimit ?? 15,
+                getLastSeen: widget.getLastSeen,
+                onDeleteMessage: widget.onDeleteMessage,
+                messageBubbleBuilder: widget.messageBubbleBuilder,
               ),
-        ],
+            ),
+            (widget.enableTypingStatus
+                ? StreamBuilder<bool>(
+                    stream: chatService.typingStatusStream(
+                      widget.senderId,
+                      widget.receiverId,
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData && snapshot.data == true) {
+                        return widget.typingIdicationBuilder?.call() ??
+                            Text("Typing...");
+                      }
+                      return SizedBox.shrink();
+                    },
+                  )
+                : SizedBox.shrink()),
+            widget.sendMessageBuilder?.call(
+                  context,
+                  onTypingMessage: widget.enableTypingStatus ? onTyping : null,
+                  sendMessage: (txt) => _sendMessage(chatService, txt),
+                  sendMediaMessage: (path, type) =>
+                      _sendMediaMessage(chatService, path, type),
+                ) ??
+                MessageInput(
+                  onSendMessage: (txt) => _sendMessage(chatService, txt),
+                  onSendAudioMessage: (path, type) =>
+                      _sendMediaMessage(chatService, path, type),
+                ),
+          ],
+        ),
       ),
     );
   }
