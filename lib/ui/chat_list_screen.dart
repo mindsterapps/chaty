@@ -20,6 +20,12 @@ class ChatListScreen extends StatefulWidget {
   /// Optional background color for the chat list screen.
   final Color? backgroundColor;
 
+  /// The padding to apply around the users list.
+  ///
+  /// This defines the amount of space to inset the children of the users list
+  /// from the edges of its container.
+  final EdgeInsets? listPadding;
+
   /// Creates a [ChatListScreen].
   ChatListScreen({
     Key? key,
@@ -27,6 +33,7 @@ class ChatListScreen extends StatefulWidget {
     required this.currentUserId,
     this.chatTileBuilder,
     this.backgroundColor,
+    this.listPadding,
   }) : super(key: key);
 
   @override
@@ -63,6 +70,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           List<ChatSummary> chats = _cachedChats;
           widget.getnumberOfusers(chats.length);
           return ListView.builder(
+            padding: widget.listPadding,
             itemCount: chats.length,
             itemBuilder: (context, index) {
               final chat = chats[index];

@@ -83,6 +83,12 @@ class ChatScreen extends StatefulWidget {
   /// If provided, this image will be displayed as the background of the chat screen.
   final DecorationImage? backgroundImage;
 
+  /// The padding to apply around the message list.
+  ///
+  /// This defines the amount of space to inset the children of the message list
+  /// from the edges of its container.
+  final EdgeInsets? listPadding;
+
   /// Creates a [ChatScreen] widget.
   /// deleteMessage feature is enabled by default.
   const ChatScreen({
@@ -104,6 +110,7 @@ class ChatScreen extends StatefulWidget {
     this.typingIdicationBuilder,
     Key? key,
     this.onMessageSelected,
+    this.listPadding,
   }) : super(key: key);
 
   @override
@@ -171,6 +178,7 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             Expanded(
               child: ChatMessageList(
+                listPadding: widget.listPadding,
                 enableDivider: widget.enableDivider,
                 dividerBuilder: widget.dividerBuilder,
                 enableDeleteMessage: widget.enableDeleteMessage,

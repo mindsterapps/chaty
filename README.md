@@ -143,4 +143,5 @@ class MyApp extends StatelessWidget {
 - **License**: This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 - **Support**: For any issues or feature requests, please open an issue on [GitHub](https://github.com/mindsterapps/chaty/issues).
 
-Happy coding! I don't want coffee 😊
+<p> <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/mindster.png?raw=true" alt="logo" />
+Happy coding! I don't want coffee 😊</p>

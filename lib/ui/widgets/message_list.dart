@@ -46,6 +46,12 @@ class ChatMessageList extends StatefulWidget {
       {required List<Message> messages,
       required void Function() deselectAll})? onMessageSelected;
 
+  /// The padding to apply around the message list.
+  ///
+  /// This defines the amount of space to inset the children of the message list
+  /// from the edges of its container.
+  final EdgeInsets? listPadding;
+
   /// Creates a [ChatMessageList] widget.
   const ChatMessageList({
     required this.enableDeleteMessage,
@@ -57,6 +63,7 @@ class ChatMessageList extends StatefulWidget {
     this.onDeleteMessage,
     this.dividerBuilder,
     this.messageBubbleBuilder,
+    this.listPadding,
     Key? key,
     this.onMessageSelected,
   }) : super(key: key);
@@ -205,6 +212,7 @@ class _ChatMessageListState extends State<ChatMessageList> {
                 return RefreshIndicator(
                   onRefresh: () => _loadMoreMessages(),
                   child: ListView.builder(
+                    padding: widget.listPadding,
                     cacheExtent: 10000,
                     controller: _scrollController,
                     reverse: true,
