@@ -1,4 +1,4 @@
-## 1.0.13
+## 1.0.14
 
 - added padding property in ChatScreen & ChatListScreen.
 - Added background color option(chat screen & chat listing).
