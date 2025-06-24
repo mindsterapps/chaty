@@ -144,5 +144,7 @@ class MyApp extends StatelessWidget {
 - **Support**: For any issues or feature requests, please open an issue on [GitHub](https://github.com/mindsterapps/chaty/issues).
 
 Happy coding! I don't want coffee 😊
+
 [contact us](https://mindster.com/)
+
 <img src="https://github.com/mindsterapps/chaty/blob/main/screenshots/mindster.png?raw=true" alt="logo" />
