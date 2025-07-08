@@ -327,7 +327,7 @@ class ChatService {
           .collection('messages')
           .doc(id);
 
-      batch.update(docRef, {'deleted': true});
+      batch.update(docRef, {'isDeleted': true});
     }
 
     try {
