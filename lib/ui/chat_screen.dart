@@ -54,11 +54,11 @@ class ChatScreen extends StatefulWidget {
   final Function()? onDeleteMessage;
 
   /// Optional callback for when messages are selected.
-  final void Function({
-    required List<Message> messages,
-    required void Function() deselectAll,
-    required void Function() deleteAll,
-  })? onMessageSelected;
+  final void Function(
+    List<Message> messages,
+    void Function() deselectAll,
+    void Function() deleteAll,
+  )? onMessageSelected;
 
   /// Optional function to handle typing status updates.
   /// This function should be called when the user types a message.
@@ -184,7 +184,15 @@ class _ChatScreenState extends State<ChatScreen> {
                 enableDivider: widget.enableDivider,
                 dividerBuilder: widget.dividerBuilder,
                 enableSwipeToDelete: widget.enableSwipeToDelete,
-                onMessageSelected: widget.onMessageSelected,
+                onMessageSelected: (
+                        {required deleteAll,
+                        required deselectAll,
+                        required messages}) =>
+                    widget.onMessageSelected?.call(
+                  messages,
+                  deselectAll,
+                  deleteAll,
+                ),
                 senderId: widget.senderId,
                 receiverId: widget.receiverId,
                 initialChatLimit: widget.intialChatLimit ?? 15,
