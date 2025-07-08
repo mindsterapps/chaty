@@ -116,12 +116,18 @@ class _ChatMessageListState extends State<ChatMessageList> {
             .toList(),
         deselectAll: clearSelection,
         deleteAll: () {
-          _chatService.deleteMessages(
+          _chatService
+              .deleteMessages(
             chatId: chatId,
             messageIds: _messages
                 .where((e) => selectedController.isSelected(e.messageId))
                 .map((e) => e.messageId)
                 .toList(),
+          )
+              .then(
+            (value) {
+              setState(() {});
+            },
           );
         },
       );
