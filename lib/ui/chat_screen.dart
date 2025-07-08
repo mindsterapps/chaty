@@ -20,7 +20,7 @@ class ChatScreen extends StatefulWidget {
   final int? intialChatLimit;
 
   /// Whether to enable the delete message feature.
-  final bool enableDeleteMessage;
+  final bool enableSwipeToDelete;
 
   /// Color for the background of the chat screen.
   final Color? backgroundColor;
@@ -54,9 +54,11 @@ class ChatScreen extends StatefulWidget {
   final Function()? onDeleteMessage;
 
   /// Optional callback for when messages are selected.
-  final void Function(
-      {required List<Message> messages,
-      required void Function() deselectAll})? onMessageSelected;
+  final void Function({
+    required List<Message> messages,
+    required void Function() deselectAll,
+    required void Function() deleteAll,
+  })? onMessageSelected;
 
   /// Optional function to handle typing status updates.
   /// This function should be called when the user types a message.
@@ -98,7 +100,7 @@ class ChatScreen extends StatefulWidget {
     this.appBar,
     this.backgroundColor,
     this.enableDivider = true,
-    this.enableDeleteMessage = true,
+    this.enableSwipeToDelete = true,
     this.sendMessageBuilder,
     this.messageBubbleBuilder,
     this.mediaUploaderFunction,
@@ -181,7 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 listPadding: widget.listPadding,
                 enableDivider: widget.enableDivider,
                 dividerBuilder: widget.dividerBuilder,
-                enableDeleteMessage: widget.enableDeleteMessage,
+                enableSwipeToDelete: widget.enableSwipeToDelete,
                 onMessageSelected: widget.onMessageSelected,
                 senderId: widget.senderId,
                 receiverId: widget.receiverId,

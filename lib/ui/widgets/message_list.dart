@@ -39,12 +39,13 @@ class ChatMessageList extends StatefulWidget {
   final bool enableDivider;
 
   /// Optional callback for sending selected messages.
-  final bool enableDeleteMessage;
+  final bool enableSwipeToDelete;
 
   /// Optional callback for when messages are selected.
   final void Function(
       {required List<Message> messages,
-      required void Function() deselectAll})? onMessageSelected;
+      required void Function() deselectAll,
+      required void Function() deleteAll})? onMessageSelected;
 
   /// The padding to apply around the message list.
   ///
@@ -54,7 +55,7 @@ class ChatMessageList extends StatefulWidget {
 
   /// Creates a [ChatMessageList] widget.
   const ChatMessageList({
-    required this.enableDeleteMessage,
+    required this.enableSwipeToDelete,
     required this.senderId,
     required this.receiverId,
     required this.enableDivider,
@@ -114,6 +115,15 @@ class _ChatMessageListState extends State<ChatMessageList> {
             .reversed
             .toList(),
         deselectAll: clearSelection,
+        deleteAll: () {
+          _chatService.deleteMessages(
+            chatId: chatId,
+            messageIds: _messages
+                .where((e) => selectedController.isSelected(e.messageId))
+                .map((e) => e.messageId)
+                .toList(),
+          );
+        },
       );
     });
     super.initState();
@@ -243,9 +253,15 @@ class _ChatMessageListState extends State<ChatMessageList> {
                                   label: formatDateDivider(message.timestamp),
                                 ),
                           GestureDetector(
-                            onHorizontalDragEnd: (details) {
-                              if (isMe && widget.enableDeleteMessage)
-                                swipe.value = !swipe.value;
+                            onPanUpdate: (details) {
+                              // Swiping in right direction.
+                              if (details.delta.dx > 0) {}
+
+                              // Swiping in left direction.
+                              if (details.delta.dx < 0) {
+                                if (isMe && widget.enableSwipeToDelete)
+                                  swipe.value = !swipe.value;
+                              }
                             },
                             onLongPress: () {
                               if (selectedController

@@ -304,4 +304,37 @@ class ChatService {
       return data['typingStatus'][receiverId] ?? false;
     });
   }
+
+  /// Deletes multiple messages by marking them as deleted in a batch operation.
+  /// This method updates the 'deleted' field of each message to true.
+  /// It does not physically delete the messages from Firestore, allowing for potential recovery.
+  ///
+  /// [chatId] is the ID of the chat containing the messages.
+  /// [messageIds] is a list of message IDs to be marked as deleted.
+  /// This method is useful for implementing a "soft delete" feature,
+  /// allowing messages to be hidden from the user without permanently removing them from the database.
+  ///
+  Future<void> deleteMessages({
+    required String chatId,
+    required List<String> messageIds,
+  }) async {
+    final batch = _firestore.batch();
+
+    for (String id in messageIds) {
+      final docRef = _firestore
+          .collection('chats')
+          .doc(chatId)
+          .collection('messages')
+          .doc(id);
+
+      batch.update(docRef, {'deleted': true});
+    }
+
+    try {
+      await batch.commit();
+      print("✅ Deleted ${messageIds.length} messages (marked as deleted).");
+    } catch (e) {
+      print("❌ Error deleting messages: $e");
+    }
+  }
 }
