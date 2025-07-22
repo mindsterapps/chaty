@@ -126,7 +126,9 @@ class _ChatMessageListState extends State<ChatMessageList> {
           )
               .then(
             (value) {
-              setState(() {});
+              _messages.removeWhere(
+                  (msg) => selectedController.isSelected(msg.messageId));
+              selectedController.clearSelection();
             },
           );
         },
