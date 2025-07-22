@@ -129,6 +129,8 @@ class _ChatMessageListState extends State<ChatMessageList> {
               _messages.removeWhere(
                   (msg) => selectedController.isSelected(msg.messageId));
               selectedController.clearSelection();
+              print('Messages deleted successfully');
+              widget.onDeleteMessage?.call();
             },
           );
         },
