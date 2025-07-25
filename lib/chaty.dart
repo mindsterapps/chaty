@@ -3,7 +3,6 @@ library chaty;
 // Export Models
 export 'models/chat.dart';
 export 'models/message.dart';
-export 'models/users.dart';
 
 // Export Services
 export 'package:chaty/services/chat_service.dart';

@@ -1,4 +1,5 @@
 import 'package:chaty/models/chat_summary.dart';
+import 'package:chaty/models/user_info.dart';
 import 'package:chaty/services/notification_services.dart';
 import 'package:chaty/services/storage_services.dart';
 import 'package:chaty/utils/extensions.dart';
@@ -29,13 +30,7 @@ class ChatService {
   }
 
   /// Sends a new message and updates chat summary.
-  Future<void> sendMessage(
-    Message message, {
-    String? senderName,
-    String? senderImageUrl,
-    String? receiverName,
-    String? receiverImageUrl,
-  }) async {
+  Future<void> sendMessage(Message message) async {
     final chatId = getChatId(message.senderId, message.receiverId);
     DocumentReference messageRef = _firestore
         .collection('chats')
@@ -69,16 +64,6 @@ class ChatService {
         '${message.senderId}': false,
         '${message.receiverId}': false,
       },
-      'userDetails': {
-        message.senderId: {
-          'name': senderName,
-          'imageUrl': senderImageUrl,
-        },
-        message.receiverId: {
-          'name': receiverName,
-          'imageUrl': receiverImageUrl,
-        },
-      }
     };
     await _firestore
         .collection('chats')
@@ -357,5 +342,62 @@ class ChatService {
     } catch (e) {
       print("❌ Error deleting messages: $e");
     }
+  }
+
+  /// Updates the sender's information in all message summaries where the senderId matches.
+  /// This method is useful when a user changes their name or profile picture,
+  /// ensuring that all chat summaries reflect the updated information.
+  /// It uses a batch operation to update the sender's name and image URL
+  /// in all relevant message summaries in Firestore.
+  ///
+  /// [userId] is the ID of the sender whose information is being updated.
+  /// [name] is the new name of the sender (optional).
+  /// [imageUrl] is the new image URL of the sender (optional).
+  /// If either [name] or [imageUrl] is null, that field will not
+  /// be updated in the message summaries.
+  Future<void> updateSenderInfo({
+    required String userId,
+    String? name,
+    String? imageUrl,
+  }) async {
+    final userChatsQuery = await _firestore
+        .collection('messageSummaries')
+        .where('senderId', isEqualTo: userId)
+        .get();
+
+    final batch = _firestore.batch();
+
+    for (var doc in userChatsQuery.docs) {
+      batch.update(doc.reference, {
+        if (name != null) 'name': name,
+        if (imageUrl != null) 'imageUrl': imageUrl,
+      });
+    }
+
+    try {
+      await batch.commit();
+      print("✅ Sender info updated in message summaries.");
+    } catch (e) {
+      print("❌ Error updating sender info: $e");
+    }
+  }
+
+  /// Retrieves the sender's information (name and image URL) for a given user ID.
+  /// This method queries the Firestore database to find the sender's information
+  /// based on the provided user ID. It returns a [SenderInfo] object containing
+  /// the sender's name and image URL.
+  Future<SenderInfo> getSenderInfo(String userId) async {
+    final querySnapshot = await _firestore
+        .collection('messageSummaries')
+        .where('senderId', isEqualTo: userId)
+        .limit(1)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      final data = querySnapshot.docs.first.data();
+      return SenderInfo.fromMap(data);
+    }
+
+    return SenderInfo(); // return empty model if not found
   }
 }
