@@ -216,21 +216,23 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   )
                 : SizedBox.shrink()),
-            widget.sendMessageBuilder?.call(
-                  context,
-                  onTypingMessage: widget.enableTypingStatus ? onTyping : null,
-                  sendMessage: (txt) => _sendMessage(chatService, txt),
-                  sendMediaMessage: (path, type) =>
-                      _sendMediaMessage(chatService, path, type),
-                ) ??
-                MessageInput(
-                  onSendMessage: (txt) => _sendMessage(chatService, txt),
-                  onSendAudioMessage: (path, type) =>
-                      _sendMediaMessage(chatService, path, type),
-                ),
           ],
         ),
       ),
+      persistentFooterButtons: [
+        widget.sendMessageBuilder?.call(
+              context,
+              onTypingMessage: widget.enableTypingStatus ? onTyping : null,
+              sendMessage: (txt) => _sendMessage(chatService, txt),
+              sendMediaMessage: (path, type) =>
+                  _sendMediaMessage(chatService, path, type),
+            ) ??
+            MessageInput(
+              onSendMessage: (txt) => _sendMessage(chatService, txt),
+              onSendAudioMessage: (path, type) =>
+                  _sendMediaMessage(chatService, path, type),
+            ),
+      ],
     );
   }
 }
