@@ -12,8 +12,8 @@ class SenderInfo {
   /// Converts this [SenderInfo] instance to a [Map] for Firestore storage.
   factory SenderInfo.fromMap(Map<String, dynamic> map) {
     return SenderInfo(
-      name: map['name'] as String?,
-      imageUrl: map['imageUrl'] as String?,
+      name: map.containsKey('name') ? map['name'] as String? : null,
+      imageUrl: map.containsKey('imageUrl') ? map['imageUrl'] as String? : null,
     );
   }
 }
