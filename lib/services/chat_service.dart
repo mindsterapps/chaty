@@ -360,26 +360,10 @@ class ChatService {
     String? name,
     String? imageUrl,
   }) async {
-    final userChatsQuery = await _firestore
-        .collection('messageSummaries')
-        .where('senderId', isEqualTo: userId)
-        .get();
-
-    final batch = _firestore.batch();
-
-    for (var doc in userChatsQuery.docs) {
-      batch.update(doc.reference, {
-        if (name != null) 'name': name,
-        if (imageUrl != null) 'imageUrl': imageUrl,
-      });
-    }
-
-    try {
-      await batch.commit();
-      print("✅ Sender info updated in message summaries.");
-    } catch (e) {
-      print("❌ Error updating sender info: $e");
-    }
+    return _firestore.collection('users').doc(userId).update({
+      if (name != null) 'name': name,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+    });
   }
 
   /// Retrieves the sender's information (name and image URL) for a given user ID.
@@ -387,15 +371,11 @@ class ChatService {
   /// based on the provided user ID. It returns a [SenderInfo] object containing
   /// the sender's name and image URL.
   Future<SenderInfo> getSenderInfo(String userId) async {
-    final querySnapshot = await _firestore
-        .collection('messageSummaries')
-        .where('senderId', isEqualTo: userId)
-        .limit(1)
-        .get();
+    final docSnapshot = await _firestore.collection('users').doc(userId).get();
 
-    if (querySnapshot.docs.isNotEmpty) {
-      final data = querySnapshot.docs.first.data();
-      return SenderInfo.fromMap(data);
+    if (docSnapshot.exists) {
+      final data = docSnapshot.data();
+      return SenderInfo.fromMap(data!);
     }
 
     return SenderInfo(); // return empty model if not found
