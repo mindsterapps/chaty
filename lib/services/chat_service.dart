@@ -370,14 +370,12 @@ class ChatService {
   /// This method queries the Firestore database to find the sender's information
   /// based on the provided user ID. It returns a [SenderInfo] object containing
   /// the sender's name and image URL.
-  Future<SenderInfo> getSenderInfo(String userId) async {
-    final docSnapshot = await _firestore.collection('users').doc(userId).get();
-
-    if (docSnapshot.exists) {
-      final data = docSnapshot.data();
-      return SenderInfo.fromMap(data!);
-    }
-
-    return SenderInfo(); // return empty model if not found
+  Stream<SenderInfo> getSenderInfo(String userId) {
+    return _firestore.collection('users').doc(userId).snapshots().map(
+      (doc) {
+        if (!doc.exists) return SenderInfo();
+        return SenderInfo.fromMap(doc.data() as Map<String, dynamic>);
+      },
+    );
   }
 }
